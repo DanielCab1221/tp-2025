@@ -43,6 +43,7 @@ public class UserControllerTest {
             "Jane", 
             "jane.smith@example.com", 
             "9876543210", 
+            "30123456",
             LocalDate.of(1990, 5, 15), 
             "1234567890123456", 
             "martin",
@@ -64,7 +65,14 @@ public class UserControllerTest {
         // Arrange
         // Assuming CuentaBancariaRecord is a required field for PropietarioRecord
         CuentaBancariaRecord cuentaBancariaRecord = new CuentaBancariaRecord("123456789", "BankName", "BranchName",1);
-        PropietarioRecord propietarioRecord = new PropietarioRecord("John", "Doe", "john.doe@example.com", 1234567890L, cuentaBancariaRecord);
+        PropietarioRecord propietarioRecord = new PropietarioRecord(
+            "John Doe",
+            "john.doe@example.com",
+            "1234567890",
+            "27123456",
+            null,
+            cuentaBancariaRecord
+        );
 
         // Act & Assert
         mockMvc.perform(post("/users/propietario")

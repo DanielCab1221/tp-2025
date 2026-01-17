@@ -12,6 +12,7 @@ public record HuespedRecord(
     String nombre,
     String email,
     String telefono,
+    String dni,
     LocalDate fechaNacimiento,
     String numeroCC,
     String nombreTitular,
@@ -26,6 +27,7 @@ public record HuespedRecord(
         huesped.setNombre(this.nombre);
         huesped.setEmail(this.email);
         huesped.setTelefono(this.telefono);
+        huesped.setDni(this.dni);
         huesped.setFechaNacimiento(this.fechaNacimiento);
         huesped.setTarjetaCredito(new ArrayList<>(List.of(
             TarjetaCredito.builder()
