@@ -20,6 +20,7 @@ CREATE TABLE users.usuarios (
     nombre VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     telefono VARCHAR(255) NOT NULL,
+    dni VARCHAR(50) NOT NULL,
     tipo VARCHAR(255) NOT NULL,
     fecha_nacimiento DATE,
     cuenta_bancaria_id INT,
