@@ -162,18 +162,4 @@ public class UserService {
 
         return usuarioRepository.save(propietario);
     }
-
-    public void eliminarPropietario(Integer id) {
-        Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
-        if (usuarioOptional.isEmpty()) {
-            throw new IllegalArgumentException("Usuario no encontrado con ID: " + id);
-        }
-
-        Usuario usuario = usuarioOptional.get();
-        if (!(usuario instanceof Propietario)) {
-            throw new IllegalArgumentException("El usuario no es un propietario");
-        }
-
-        usuarioRepository.deleteById(id);
-    }
 }

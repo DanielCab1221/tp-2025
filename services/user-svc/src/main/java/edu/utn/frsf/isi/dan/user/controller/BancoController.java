@@ -6,6 +6,7 @@ import edu.utn.frsf.isi.dan.user.service.BancoService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,7 @@ public class BancoController {
 
     @Operation(summary = "Crear banco")
     @PostMapping
-    public ResponseEntity<Banco> crearBanco(@RequestBody BancoDTO dto) {
+    public ResponseEntity<Banco> crearBanco(@RequestBody @Valid BancoDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(bancoService.crearBanco(dto));
     }
 
@@ -44,7 +45,7 @@ public class BancoController {
 
     @Operation(summary = "Actualizar banco")
     @PutMapping("/{id}")
-    public ResponseEntity<Banco> actualizarBanco(@PathVariable Integer id, @RequestBody BancoDTO dto) {
+    public ResponseEntity<Banco> actualizarBanco(@PathVariable Integer id, @RequestBody @Valid BancoDTO dto) {
         try {
             return ResponseEntity.ok(bancoService.actualizarBanco(id, dto));
         } catch (IllegalArgumentException e) {

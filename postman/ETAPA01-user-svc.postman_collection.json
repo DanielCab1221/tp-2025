@@ -1,0 +1,186 @@
+{
+	"info": {
+		"_postman_id": "user-svc-etapa01",
+		"name": "TP DAN 2025 - ETAPA01 - user-svc",
+		"description": "Colección de endpoints para el microservicio user-svc (ETAPA01)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Usuarios",
+			"item": [
+				{
+					"name": "Crear Huesped",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"url": "{{baseUrl}}/users/huesped",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Juan Pérez\",\n  \"email\": \"juan@example.com\",\n  \"telefono\": \"+5493414567890\",\n  \"dni\": \"12345678\",\n  \"fechaNacimiento\": \"1990-01-15\",\n  \"tarjetaCredito\": {\n    \"numero\": \"1234567890123456\",\n    \"nombreTitular\": \"JUAN PEREZ\",\n    \"fechaVencimiento\": \"12/25\",\n    \"cvc\": \"123\",\n    \"esPrincipal\": true\n  },\n  \"idBanco\": 1\n}"
+						}
+					}
+				},
+				{
+					"name": "Crear Propietario",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"url": "{{baseUrl}}/users/propietario",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"María García\",\n  \"email\": \"maria@example.com\",\n  \"telefono\": \"+5493414567891\",\n  \"dni\": \"87654321\",\n  \"cuentaBancaria\": {\n    \"numeroCuenta\": \"001234567890\",\n    \"cbu\": \"0123456789012345678901\",\n    \"idBanco\": 1\n  }\n}"
+						}
+					}
+				},
+				{
+					"name": "Buscar por Nombre",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/users?nombre=Juan&page=0&size=10",
+							"query": [
+								{"key": "nombre", "value": "Juan"},
+								{"key": "page", "value": "0"},
+								{"key": "size", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Buscar por DNI Exacto",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/users/dni/12345678"
+					}
+				},
+				{
+					"name": "Actualizar Huesped",
+					"request": {
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"url": "{{baseUrl}}/users/huesped/1",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Juan Carlos Pérez\",\n  \"email\": \"juancarlos@example.com\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Actualizar Propietario",
+					"request": {
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"url": "{{baseUrl}}/users/propietario/2",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"idHotel\": 5\n}"
+						}
+					}
+				},
+				{
+					"name": "Eliminar Huesped",
+					"request": {
+						"method": "DELETE",
+						"url": "{{baseUrl}}/users/huesped/1"
+					}
+				}
+			]
+		},
+		{
+			"name": "Tarjetas de Crédito",
+			"item": [
+				{
+					"name": "Agregar Tarjeta",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"url": "{{baseUrl}}/tarjetas/huesped/1",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"numero\": \"9876543210987654\",\n  \"nombreTitular\": \"JUAN PEREZ\",\n  \"fechaVencimiento\": \"06/27\",\n  \"cvc\": \"456\",\n  \"esPrincipal\": false,\n  \"idBanco\": 2\n}"
+						}
+					}
+				},
+				{
+					"name": "Listar Tarjetas de Huesped",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/tarjetas/huesped/1"
+					}
+				},
+				{
+					"name": "Cambiar Tarjeta Principal",
+					"request": {
+						"method": "PATCH",
+						"url": "{{baseUrl}}/tarjetas/huesped/1/principal/2"
+					}
+				},
+				{
+					"name": "Eliminar Tarjeta",
+					"request": {
+						"method": "DELETE",
+						"url": "{{baseUrl}}/tarjetas/2"
+					}
+				}
+			]
+		},
+		{
+			"name": "Bancos",
+			"item": [
+				{
+					"name": "Crear Banco",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"url": "{{baseUrl}}/bancos",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Banco Nación\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Listar Bancos",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/bancos"
+					}
+				},
+				{
+					"name": "Obtener Banco por ID",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/bancos/1"
+					}
+				},
+				{
+					"name": "Actualizar Banco",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"url": "{{baseUrl}}/bancos/1",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Banco de la Nación Argentina\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Eliminar Banco",
+					"request": {
+						"method": "DELETE",
+						"url": "{{baseUrl}}/bancos/1"
+					}
+				}
+			]
+		}
+	]
+}
