@@ -68,7 +68,7 @@ public class UserController {
 
     @Operation(summary = "Actualizar huesped", description = "Actualiza datos de un huesped existente")
     @PatchMapping("/huesped/{id}")
-    public ResponseEntity<Usuario> actualizarHuesped(@PathVariable Integer id, @RequestBody HuespedUpdateDTO updateDTO) {
+    public ResponseEntity<Usuario> actualizarHuesped(@PathVariable Integer id, @RequestBody @Valid HuespedUpdateDTO updateDTO) {
         try {
             return ResponseEntity.ok(userService.actualizarHuesped(id, updateDTO));
         } catch (IllegalArgumentException e) {
@@ -89,20 +89,9 @@ public class UserController {
 
     @Operation(summary = "Actualizar propietario", description = "Actualiza datos de un propietario existente")
     @PatchMapping("/propietario/{id}")
-    public ResponseEntity<Usuario> actualizarPropietario(@PathVariable Integer id, @RequestBody PropietarioUpdateDTO updateDTO) {
+    public ResponseEntity<Usuario> actualizarPropietario(@PathVariable Integer id, @RequestBody @Valid PropietarioUpdateDTO updateDTO) {
         try {
             return ResponseEntity.ok(userService.actualizarPropietario(id, updateDTO));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @Operation(summary = "Eliminar propietario", description = "Elimina un propietario por su ID")
-    @DeleteMapping("/propietario/{id}")
-    public ResponseEntity<Void> eliminarPropietario(@PathVariable Integer id) {
-        try {
-            userService.eliminarPropietario(id);
-            return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         }

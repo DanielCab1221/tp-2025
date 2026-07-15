@@ -6,6 +6,7 @@ import edu.utn.frsf.isi.dan.user.service.TarjetaCreditoService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,7 +27,7 @@ public class TarjetaCreditoController {
     @PostMapping("/huesped/{huespedId}")
     public ResponseEntity<TarjetaCredito> agregarTarjeta(
             @PathVariable Integer huespedId,
-            @RequestBody TarjetaCreditoDTO dto) {
+            @RequestBody @Valid TarjetaCreditoDTO dto) {
         try {
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(tarjetaCreditoService.agregarTarjeta(huespedId, dto));
