@@ -3,6 +3,7 @@ package edu.utn.frsf.isi.dan.user.controller;
 import edu.utn.frsf.isi.dan.user.dto.HuespedRecord;
 import edu.utn.frsf.isi.dan.user.dto.HuespedUpdateDTO;
 import edu.utn.frsf.isi.dan.user.dto.PropietarioRecord;
+import edu.utn.frsf.isi.dan.user.dto.PropietarioUpdateDTO;
 import edu.utn.frsf.isi.dan.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -80,6 +81,27 @@ public class UserController {
     public ResponseEntity<Void> eliminarHuesped(@PathVariable Integer id) {
         try {
             userService.eliminarHuesped(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @Operation(summary = "Actualizar propietario", description = "Actualiza datos de un propietario existente")
+    @PatchMapping("/propietario/{id}")
+    public ResponseEntity<Usuario> actualizarPropietario(@PathVariable Integer id, @RequestBody PropietarioUpdateDTO updateDTO) {
+        try {
+            return ResponseEntity.ok(userService.actualizarPropietario(id, updateDTO));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @Operation(summary = "Eliminar propietario", description = "Elimina un propietario por su ID")
+    @DeleteMapping("/propietario/{id}")
+    public ResponseEntity<Void> eliminarPropietario(@PathVariable Integer id) {
+        try {
+            userService.eliminarPropietario(id);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();

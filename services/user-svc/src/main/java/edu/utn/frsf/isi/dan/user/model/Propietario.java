@@ -12,7 +12,7 @@ import jakarta.persistence.*;
 @EqualsAndHashCode(callSuper = true)
 public class Propietario extends Usuario {
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "cuenta_bancaria_id")
     private CuentaBancaria cuentaBancaria;
 
