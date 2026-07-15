@@ -1,6 +1,7 @@
 package edu.utn.frsf.isi.dan.user.controller;
 
 import edu.utn.frsf.isi.dan.user.dto.HuespedRecord;
+import edu.utn.frsf.isi.dan.user.dto.HuespedUpdateDTO;
 import edu.utn.frsf.isi.dan.user.dto.PropietarioRecord;
 import edu.utn.frsf.isi.dan.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,5 +63,26 @@ public class UserController {
     @GetMapping("/buscar-dni")
     public Page<Usuario> buscarUsuariosPorDni(@RequestParam String dni, Pageable pageable) {
         return userService.buscarPorDni(dni, pageable);
+    }
+
+    @Operation(summary = "Actualizar huesped", description = "Actualiza datos de un huesped existente")
+    @PatchMapping("/huesped/{id}")
+    public ResponseEntity<Usuario> actualizarHuesped(@PathVariable Integer id, @RequestBody HuespedUpdateDTO updateDTO) {
+        try {
+            return ResponseEntity.ok(userService.actualizarHuesped(id, updateDTO));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @Operation(summary = "Eliminar huesped", description = "Elimina un huesped por su ID")
+    @DeleteMapping("/huesped/{id}")
+    public ResponseEntity<Void> eliminarHuesped(@PathVariable Integer id) {
+        try {
+            userService.eliminarHuesped(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

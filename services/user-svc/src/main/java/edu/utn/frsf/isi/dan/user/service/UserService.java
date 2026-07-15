@@ -5,6 +5,7 @@ import edu.utn.frsf.isi.dan.user.dao.CuentaBancariaRepository;
 import edu.utn.frsf.isi.dan.user.dao.TarjetaCreditoRepository;
 import edu.utn.frsf.isi.dan.user.dao.UsuarioRepository;
 import edu.utn.frsf.isi.dan.user.dto.HuespedRecord;
+import edu.utn.frsf.isi.dan.user.dto.HuespedUpdateDTO;
 import edu.utn.frsf.isi.dan.user.dto.PropietarioRecord;
 import edu.utn.frsf.isi.dan.user.model.Banco;
 import edu.utn.frsf.isi.dan.user.model.CuentaBancaria;
@@ -87,5 +88,48 @@ public class UserService {
 
     public Usuario buscarPorDniExacto(String dni) {
         return usuarioRepository.findByDni(dni);
+    }
+
+    public Huesped actualizarHuesped(Integer id, HuespedUpdateDTO updateDTO) {
+        Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
+        if (usuarioOptional.isEmpty()) {
+            throw new IllegalArgumentException("Usuario no encontrado con ID: " + id);
+        }
+
+        Usuario usuario = usuarioOptional.get();
+        if (!(usuario instanceof Huesped)) {
+            throw new IllegalArgumentException("El usuario no es un huésped");
+        }
+
+        Huesped huesped = (Huesped) usuario;
+        
+        if (updateDTO.nombre() != null) {
+            huesped.setNombre(updateDTO.nombre());
+        }
+        if (updateDTO.email() != null) {
+            huesped.setEmail(updateDTO.email());
+        }
+        if (updateDTO.telefono() != null) {
+            huesped.setTelefono(updateDTO.telefono());
+        }
+        if (updateDTO.fechaNacimiento() != null) {
+            huesped.setFechaNacimiento(updateDTO.fechaNacimiento());
+        }
+
+        return usuarioRepository.save(huesped);
+    }
+
+    public void eliminarHuesped(Integer id) {
+        Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
+        if (usuarioOptional.isEmpty()) {
+            throw new IllegalArgumentException("Usuario no encontrado con ID: " + id);
+        }
+
+        Usuario usuario = usuarioOptional.get();
+        if (!(usuario instanceof Huesped)) {
+            throw new IllegalArgumentException("El usuario no es un huésped");
+        }
+
+        usuarioRepository.deleteById(id);
     }
 }
