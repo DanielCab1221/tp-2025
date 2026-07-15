@@ -7,6 +7,7 @@ import edu.utn.frsf.isi.dan.user.dao.UsuarioRepository;
 import edu.utn.frsf.isi.dan.user.dto.HuespedRecord;
 import edu.utn.frsf.isi.dan.user.dto.HuespedUpdateDTO;
 import edu.utn.frsf.isi.dan.user.dto.PropietarioRecord;
+import edu.utn.frsf.isi.dan.user.dto.PropietarioUpdateDTO;
 import edu.utn.frsf.isi.dan.user.model.Banco;
 import edu.utn.frsf.isi.dan.user.model.CuentaBancaria;
 import edu.utn.frsf.isi.dan.user.model.Huesped;
@@ -128,6 +129,49 @@ public class UserService {
         Usuario usuario = usuarioOptional.get();
         if (!(usuario instanceof Huesped)) {
             throw new IllegalArgumentException("El usuario no es un huésped");
+        }
+
+        usuarioRepository.deleteById(id);
+    }
+
+    public Propietario actualizarPropietario(Integer id, PropietarioUpdateDTO updateDTO) {
+        Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
+        if (usuarioOptional.isEmpty()) {
+            throw new IllegalArgumentException("Usuario no encontrado con ID: " + id);
+        }
+
+        Usuario usuario = usuarioOptional.get();
+        if (!(usuario instanceof Propietario)) {
+            throw new IllegalArgumentException("El usuario no es un propietario");
+        }
+
+        Propietario propietario = (Propietario) usuario;
+        
+        if (updateDTO.nombre() != null) {
+            propietario.setNombre(updateDTO.nombre());
+        }
+        if (updateDTO.email() != null) {
+            propietario.setEmail(updateDTO.email());
+        }
+        if (updateDTO.telefono() != null) {
+            propietario.setTelefono(updateDTO.telefono());
+        }
+        if (updateDTO.idHotel() != null) {
+            propietario.setIdHotel(updateDTO.idHotel());
+        }
+
+        return usuarioRepository.save(propietario);
+    }
+
+    public void eliminarPropietario(Integer id) {
+        Optional<Usuario> usuarioOptional = usuarioRepository.findById(id);
+        if (usuarioOptional.isEmpty()) {
+            throw new IllegalArgumentException("Usuario no encontrado con ID: " + id);
+        }
+
+        Usuario usuario = usuarioOptional.get();
+        if (!(usuario instanceof Propietario)) {
+            throw new IllegalArgumentException("El usuario no es un propietario");
         }
 
         usuarioRepository.deleteById(id);
