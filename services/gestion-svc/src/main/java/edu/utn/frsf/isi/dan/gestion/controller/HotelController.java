@@ -1,5 +1,6 @@
 package edu.utn.frsf.isi.dan.gestion.controller;
 
+import edu.utn.frsf.isi.dan.gestion.model.Amenity;
 import edu.utn.frsf.isi.dan.gestion.model.Hotel;
 import edu.utn.frsf.isi.dan.gestion.service.HotelService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +28,16 @@ public class HotelController {
     }
 
     @GetMapping
-    public List<Hotel> getAll() {
-        return hotelService.findAll();
+    public List<Hotel> getAll(
+            @RequestParam(required = false) String nombre,
+            @RequestParam(required = false) Integer categoriaMinima,
+            @RequestParam(required = false) String domicilio,
+            @RequestParam(required = false) Boolean cerrado,
+            @RequestParam(required = false) Amenity amenity) {
+        if (nombre == null && categoriaMinima == null && domicilio == null && cerrado == null && amenity == null) {
+            return hotelService.findAll();
+        }
+        return hotelService.buscar(nombre, categoriaMinima, domicilio, cerrado, amenity);
     }
 
     @PutMapping("/{id}")
@@ -43,5 +52,16 @@ public class HotelController {
         return hotelService.cerrar(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}/amenities")
+    public ResponseEntity<Hotel> agregarAmenities(@PathVariable Integer id, @RequestBody List<Amenity> amenities) {
+        return ResponseEntity.ok(hotelService.agregarAmenities(id, amenities));
+    }
+
+    @DeleteMapping("/{id}/amenities/{amenity}")
+    public ResponseEntity<Void> quitarAmenity(@PathVariable Integer id, @PathVariable Amenity amenity) {
+        hotelService.quitarAmenity(id, amenity);
+        return ResponseEntity.noContent().build();
     }
 }

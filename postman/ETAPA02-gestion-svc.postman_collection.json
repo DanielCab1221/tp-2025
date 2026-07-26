@@ -1,0 +1,245 @@
+{
+	"info": {
+		"_postman_id": "gestion-svc-etapa02",
+		"name": "TP DAN 2025 - ETAPA02 - gestion-svc",
+		"description": "Colección de endpoints para el microservicio gestion-svc (ETAPA02): hoteles, habitaciones, tarifas y tipos de habitación",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8083",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "Hoteles",
+			"item": [
+				{
+					"name": "Crear Hotel",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"url": "{{baseUrl}}/hoteles",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Hotel Rio\",\n  \"cuit\": \"30-99887766-1\",\n  \"domicilio\": \"Av. Costanera 100\",\n  \"latitud\": -31.6,\n  \"longitud\": -60.7,\n  \"telefono\": \"+543424567890\",\n  \"correoContacto\": \"contacto@hotelrio.com\",\n  \"categoria\": 5\n}"
+						}
+					}
+				},
+				{
+					"name": "Obtener Hotel por ID",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/hoteles/1"
+					}
+				},
+				{
+					"name": "Listar Todos los Hoteles",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/hoteles"
+					}
+				},
+				{
+					"name": "Buscar Hoteles (filtros combinables)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/hoteles?nombre=Rio&categoriaMinima=4&domicilio=Costanera&cerrado=false&amenity=PILETA",
+							"query": [
+								{"key": "nombre", "value": "Rio"},
+								{"key": "categoriaMinima", "value": "4"},
+								{"key": "domicilio", "value": "Costanera"},
+								{"key": "cerrado", "value": "false"},
+								{"key": "amenity", "value": "PILETA"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Actualizar Hotel (solo categoria/telefono/correo)",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"url": "{{baseUrl}}/hoteles/1",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"categoria\": 4,\n  \"telefono\": \"+543424560000\",\n  \"correoContacto\": \"nuevo-contacto@hotelrio.com\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Cerrar Hotel",
+					"request": {
+						"method": "PATCH",
+						"url": "{{baseUrl}}/hoteles/1/cerrar"
+					}
+				},
+				{
+					"name": "Agregar Amenities a Hotel",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"url": "{{baseUrl}}/hoteles/1/amenities",
+						"body": {
+							"mode": "raw",
+							"raw": "[\"PILETA\", \"WIFI\", \"GIMNASIO\"]"
+						}
+					}
+				},
+				{
+					"name": "Quitar Amenity de Hotel",
+					"request": {
+						"method": "DELETE",
+						"url": "{{baseUrl}}/hoteles/1/amenities/WIFI"
+					}
+				}
+			]
+		},
+		{
+			"name": "Habitaciones",
+			"item": [
+				{
+					"name": "Crear Habitacion",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"url": "{{baseUrl}}/habitaciones",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"numero\": 101,\n  \"piso\": 1,\n  \"tipoHabitacion\": { \"id\": 1 },\n  \"hotel\": { \"id\": 1 }\n}"
+						}
+					}
+				},
+				{
+					"name": "Obtener Habitacion por ID",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/habitaciones/1"
+					}
+				},
+				{
+					"name": "Listar Todas las Habitaciones",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/habitaciones"
+					}
+				},
+				{
+					"name": "Buscar Habitaciones (filtros combinables)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseUrl}}/habitaciones?tipoHabitacionId=1&capacidadMinima=2&disponible=true&hotelId=1&precioMin=1000&precioMax=5000",
+							"query": [
+								{"key": "tipoHabitacionId", "value": "1"},
+								{"key": "capacidadMinima", "value": "2"},
+								{"key": "disponible", "value": "true"},
+								{"key": "hotelId", "value": "1"},
+								{"key": "precioMin", "value": "1000"},
+								{"key": "precioMax", "value": "5000"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Obtener Tarifa Vigente de una Habitacion",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/habitaciones/1/tarifa-vigente"
+					}
+				},
+				{
+					"name": "Actualizar Habitacion",
+					"request": {
+						"method": "PUT",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"url": "{{baseUrl}}/habitaciones/1",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"numero\": 102,\n  \"piso\": 1,\n  \"tipoHabitacion\": { \"id\": 1 },\n  \"hotel\": { \"id\": 1 }\n}"
+						}
+					}
+				},
+				{
+					"name": "Eliminar Habitacion",
+					"request": {
+						"method": "DELETE",
+						"url": "{{baseUrl}}/habitaciones/1"
+					}
+				}
+			]
+		},
+		{
+			"name": "Tarifas",
+			"item": [
+				{
+					"name": "Crear Tarifa Continua (sin fechas)",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"url": "{{baseUrl}}/tarifas",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tipoHabitacion\": { \"id\": 1 },\n  \"precioNoche\": 15000.50\n}"
+						}
+					}
+				},
+				{
+					"name": "Crear Tarifa Promocional (con fechas)",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"url": "{{baseUrl}}/tarifas",
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tipoHabitacion\": { \"id\": 1 },\n  \"fechaInicio\": \"2026-08-05\",\n  \"fechaFin\": \"2026-08-10\",\n  \"precioNoche\": 9999.00\n}"
+						}
+					}
+				},
+				{
+					"name": "Obtener Tarifa por ID",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/tarifas/1"
+					}
+				},
+				{
+					"name": "Listar Todas las Tarifas",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/tarifas"
+					}
+				},
+				{
+					"name": "Eliminar Tarifa",
+					"request": {
+						"method": "DELETE",
+						"url": "{{baseUrl}}/tarifas/1"
+					}
+				}
+			]
+		},
+		{
+			"name": "Tipos de Habitacion",
+			"item": [
+				{
+					"name": "Listar Tipos de Habitacion",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/tipos-habitacion"
+					}
+				},
+				{
+					"name": "Obtener Tipo de Habitacion por ID",
+					"request": {
+						"method": "GET",
+						"url": "{{baseUrl}}/tipos-habitacion/1"
+					}
+				}
+			]
+		}
+	]
+}

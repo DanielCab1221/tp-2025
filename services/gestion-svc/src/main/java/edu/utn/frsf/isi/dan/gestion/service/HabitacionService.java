@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Log4j2
@@ -54,6 +55,25 @@ public class HabitacionService {
 
     public List<Habitacion> findAll() {
         return habitacionRepository.findAll();
+    }
+
+    /**
+     * El precio no es una columna de Habitacion (se resuelve via la tarifa vigente del tipo),
+     * asi que el filtro por precio se aplica en memoria despues de traer las que matchean el
+     * resto de los criterios por query.
+     */
+    public List<Habitacion> buscar(Integer tipoHabitacionId, Integer capacidadMinima, Boolean disponible,
+                                    Integer hotelId, Double precioMin, Double precioMax) {
+        List<Habitacion> candidatas = habitacionRepository.buscar(tipoHabitacionId, capacidadMinima, disponible, hotelId);
+        if (precioMin == null && precioMax == null) {
+            return candidatas;
+        }
+        return candidatas.stream()
+                .filter(h -> {
+                    Double precio = tarifaService.obtenerPrecioVigente(h.getTipoHabitacion().getId());
+                    return (precioMin == null || precio >= precioMin) && (precioMax == null || precio <= precioMax);
+                })
+                .collect(Collectors.toList());
     }
 
     public void enviarHabitacionJms(Habitacion habitacion, boolean isNew) {

@@ -46,8 +46,18 @@ public class HabitacionController {
     }
 
     @GetMapping
-    public List<Habitacion> getAll() {
-        return habitacionService.findAll();
+    public List<Habitacion> getAll(
+            @RequestParam(required = false) Integer tipoHabitacionId,
+            @RequestParam(required = false) Integer capacidadMinima,
+            @RequestParam(required = false) Boolean disponible,
+            @RequestParam(required = false) Integer hotelId,
+            @RequestParam(required = false) Double precioMin,
+            @RequestParam(required = false) Double precioMax) {
+        if (tipoHabitacionId == null && capacidadMinima == null && disponible == null
+                && hotelId == null && precioMin == null && precioMax == null) {
+            return habitacionService.findAll();
+        }
+        return habitacionService.buscar(tipoHabitacionId, capacidadMinima, disponible, hotelId, precioMin, precioMax);
     }
 
     @GetMapping("/{id}/tarifa-vigente")
