@@ -1,10 +1,7 @@
 package edu.utn.frsf.isi.dan.user.dto;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
-import edu.utn.frsf.isi.dan.user.model.Banco;
 import edu.utn.frsf.isi.dan.user.model.Huesped;
 import edu.utn.frsf.isi.dan.user.model.TarjetaCredito;
 
@@ -29,17 +26,6 @@ public record HuespedRecord(
         huesped.setTelefono(this.telefono);
         huesped.setDni(this.dni);
         huesped.setFechaNacimiento(this.fechaNacimiento);
-        huesped.setTarjetaCredito(new ArrayList<>(List.of(
-            TarjetaCredito.builder()
-            .numero(this.numeroCC)
-            .nombreTitular(this.nombreTitular)
-            .fechaVencimiento(this.fechaVencimientoCC)
-            .cvc(this.cvcCC)
-            .esPrincipal(this.esPrincipalCC)
-            .banco(Banco.builder()
-                .id(this.idBanco)
-                .build()).build()
-        )));
         return huesped;
     }
 

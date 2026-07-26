@@ -65,7 +65,7 @@ public class TarjetaCreditoService {
     }
 
     public void eliminarTarjeta(Integer tarjetaId) {
-        Optional<TarjetaCredito> tarjetaOptional = tarjetaCreditoRepository.findById(Long.valueOf(tarjetaId));
+        Optional<TarjetaCredito> tarjetaOptional = tarjetaCreditoRepository.findById(tarjetaId);
         if (tarjetaOptional.isEmpty()) {
             throw new IllegalArgumentException("Tarjeta no encontrada con ID: " + tarjetaId);
         }
@@ -75,12 +75,12 @@ public class TarjetaCreditoService {
             throw new IllegalStateException("No se puede eliminar la tarjeta principal");
         }
 
-        tarjetaCreditoRepository.deleteById(Long.valueOf(tarjetaId));
+        tarjetaCreditoRepository.deleteById(tarjetaId);
     }
 
     @Transactional
     public TarjetaCredito cambiarTarjetaPrincipal(Integer huespedId, Integer tarjetaId) {
-        Optional<TarjetaCredito> tarjetaOptional = tarjetaCreditoRepository.findById(Long.valueOf(tarjetaId));
+        Optional<TarjetaCredito> tarjetaOptional = tarjetaCreditoRepository.findById(tarjetaId);
         if (tarjetaOptional.isEmpty()) {
             throw new IllegalArgumentException("Tarjeta no encontrada con ID: " + tarjetaId);
         }
