@@ -17,6 +17,7 @@ public class HabitacionDTO {
     private String tipoHabitacion;
     private String tipoHabitacionDescripcion;
     private Double precioNoche;
+    private Boolean disponible;
     private List<String> amenities;
     private HotelDTO hotel;
 
