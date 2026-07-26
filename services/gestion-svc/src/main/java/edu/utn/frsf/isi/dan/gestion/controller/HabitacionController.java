@@ -17,7 +17,9 @@
 package edu.utn.frsf.isi.dan.gestion.controller;
 
 import edu.utn.frsf.isi.dan.gestion.model.Habitacion;
+import edu.utn.frsf.isi.dan.gestion.model.Tarifa;
 import edu.utn.frsf.isi.dan.gestion.service.HabitacionService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +34,7 @@ public class HabitacionController {
     private HabitacionService habitacionService;
 
     @PostMapping
-    public ResponseEntity<Habitacion> create(@RequestBody Habitacion habitacion) {
+    public ResponseEntity<Habitacion> create(@Valid @RequestBody Habitacion habitacion) {
         return ResponseEntity.ok(habitacionService.save(habitacion));
     }
 
@@ -48,8 +50,16 @@ public class HabitacionController {
         return habitacionService.findAll();
     }
 
+    @GetMapping("/{id}/tarifa-vigente")
+    public ResponseEntity<Tarifa> getTarifaVigente(@PathVariable Integer id) {
+        return habitacionService.findById(id)
+                .flatMap(habitacion -> habitacionService.obtenerTarifaVigente(habitacion))
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PutMapping("/{id}")
-    public ResponseEntity<Habitacion> update(@PathVariable Integer id, @RequestBody Habitacion habitacion) {
+    public ResponseEntity<Habitacion> update(@PathVariable Integer id, @Valid @RequestBody Habitacion habitacion) {
         if (!habitacionService.findById(id).isPresent()) return ResponseEntity.notFound().build();
         habitacion.setId(id);
         return ResponseEntity.ok(habitacionService.save(habitacion));

@@ -56,10 +56,12 @@ ON CONFLICT (id) DO NOTHING;
 CREATE TABLE IF NOT EXISTS tp_dan.tarifa (
     id serial PRIMARY KEY,
     fecha_inicio date NOT NULL,
-    fecha_fin date NOT NULL,
+    fecha_fin date, -- null = tarifa continua, sin fecha de fin definida
     id_tipo_habitacion integer NOT NULL REFERENCES tp_dan.tipo_habitacion(id),
     precio_noche decimal(10,2) NOT NULL
 );
+
+ALTER TABLE tp_dan.tarifa ALTER COLUMN fecha_fin DROP NOT NULL;
 
 -- Secuencia para habitacion
 DO $$
