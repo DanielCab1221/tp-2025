@@ -2,6 +2,7 @@ package edu.utn.frsf.isi.dan.gestion.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -11,6 +12,17 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 
 @RestControllerAdvice
 public class ControllerAdvisor {
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ExceptionInfo> handleMethodNotSupportedException(HttpRequestMethodNotSupportedException ex, WebRequest request) {
+        ExceptionInfo exceptionInfo = new ExceptionInfo(
+                ex.getMessage(),
+                request.getDescription(false),
+                String.valueOf(System.currentTimeMillis()),
+                HttpStatus.METHOD_NOT_ALLOWED.value()
+        );
+        return new ResponseEntity<>(exceptionInfo, HttpStatus.METHOD_NOT_ALLOWED);
+    }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ExceptionInfo> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request) {
