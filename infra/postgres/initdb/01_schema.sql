@@ -13,7 +13,7 @@ end$$;
 CREATE TABLE IF NOT EXISTS tp_dan.hotel (
     id integer PRIMARY KEY DEFAULT nextval('tp_dan.hotel_id_seq'),
     nombre varchar(255) NOT NULL,
-    cuit varchar(20) NOT NULL,
+    cuit varchar(20) NOT NULL UNIQUE,
     domicilio varchar(255) NOT NULL,
     latitud decimal(10,7),
     longitud decimal(10,7),
@@ -24,6 +24,13 @@ CREATE TABLE IF NOT EXISTS tp_dan.hotel (
 );
 
 ALTER TABLE tp_dan.hotel ADD COLUMN IF NOT EXISTS cerrado boolean NOT NULL DEFAULT false;
+
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'hotel_cuit_key') THEN
+        ALTER TABLE tp_dan.hotel ADD CONSTRAINT hotel_cuit_key UNIQUE (cuit);
+    END IF;
+END$$;
 
 -- Tabla tipo_habitacion
 CREATE TABLE IF NOT EXISTS tp_dan.tipo_habitacion (
@@ -68,8 +75,11 @@ CREATE TABLE IF NOT EXISTS tp_dan.habitacion (
     numero integer NOT NULL,
     piso integer NOT NULL,
     id_tipo integer NOT NULL REFERENCES tp_dan.tipo_habitacion(id),
-    id_hotel integer NOT NULL REFERENCES tp_dan.hotel(id)
+    id_hotel integer NOT NULL REFERENCES tp_dan.hotel(id),
+    disponible boolean NOT NULL DEFAULT true
 );
+
+ALTER TABLE tp_dan.habitacion ADD COLUMN IF NOT EXISTS disponible boolean NOT NULL DEFAULT true;
 
 -- Secuencia para amenity_hotel_id_seq
 DO $$

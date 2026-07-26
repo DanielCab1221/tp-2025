@@ -21,5 +21,7 @@ public class Habitacion {
     @ManyToOne
     @JoinColumn(name = "id_hotel")
     private Hotel hotel;
-    
+    @Builder.Default
+    private Boolean disponible = true;
+
 }
