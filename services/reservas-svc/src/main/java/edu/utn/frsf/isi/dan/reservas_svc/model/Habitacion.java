@@ -18,6 +18,7 @@ public class Habitacion {
     private Long habitacionId;
     private Integer capacidad;
     private Double precioNoche;
+    private Boolean disponible;
     private List<String> amenities;
     private List<ReservaSimple> reservas;
     private Hotel hotel;

@@ -1,11 +1,14 @@
 package edu.utn.frsf.isi.dan.reservas_svc.service;
 
+import edu.utn.frsf.isi.dan.reservas_svc.model.EstadoReserva;
 import edu.utn.frsf.isi.dan.reservas_svc.model.Habitacion;
 import edu.utn.frsf.isi.dan.reservas_svc.model.Hotel;
+import edu.utn.frsf.isi.dan.reservas_svc.model.Reserva;
 import edu.utn.frsf.isi.dan.reservas_svc.repository.HabitacionRepository;
 import edu.utn.frsf.isi.dan.shared.HabitacionDTO;
 import edu.utn.frsf.isi.dan.shared.HabitacionEvent;
 import edu.utn.frsf.isi.dan.shared.HotelDTO;
+import edu.utn.frsf.isi.dan.shared.TarifaDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -16,6 +19,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +27,9 @@ import java.util.Optional;
 public class HabitacionService {
     @Autowired
     private HabitacionRepository habitacionRepository;
+
+    @Autowired
+    private ReservaService reservaService;
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -43,20 +50,16 @@ public class HabitacionService {
         habitacionRepository.deleteById(id);
     }
 
-    
     public void handleEvent(HabitacionEvent event) {
         switch (event.getTipoEvento()) {
             case CREAR:
                 save(mapFromHabitacion(event.getHabitacion()));
                 break;
             case ACTUALIZAR_DATOS:
-                updateByHabitacionId(event.getHabitacion().getHabitacionId(),mapFromHabitacion(event.getHabitacion()));
+                actualizarDatos(event.getHabitacion());
                 break;
             case ACTUALIZAR_PRECIO:
-                // TODO implementar por el alumno
-                // en este caso el atributo TarifaDTO tiene 
-                // el ID de los tipos de habitaciones que van a tener un nuevo precio y el nuevo precio
-                // event.getTarifa()
+                actualizarPrecioPorTipo(event.getTarifa());
                 break;
             case ELIMINAR:
                 deleteByHabitacionId(event.getHabitacion().getHabitacionId());
@@ -66,18 +69,62 @@ public class HabitacionService {
         }
     }
 
+    /**
+     * Ademas de actualizar los datos de la habitacion, detecta la transicion "hotel se cerro
+     * ahora" comparando el estado guardado contra el que trae el evento. gestion-svc publica un
+     * ACTUALIZAR_DATOS por cada habitacion del hotel al cerrarlo, asi que esto crea exactamente
+     * una reserva CERRADA por habitacion, y no se duplica en reentregas del mensaje porque en
+     * ese caso la habitacion ya va a tener hotel.cerrado = true guardado de antes.
+     */
+    private void actualizarDatos(HabitacionDTO dto) {
+        boolean yaEstabaCerrado = findByHabitacionId(dto.getHabitacionId())
+                .map(h -> h.getHotel() != null && Boolean.TRUE.equals(h.getHotel().getCerrado()))
+                .orElse(false);
+        boolean seCierraAhora = !yaEstabaCerrado && dto.getHotel() != null && Boolean.TRUE.equals(dto.getHotel().getCerrado());
+
+        Habitacion actualizada = updateByHabitacionId(dto.getHabitacionId(), mapFromHabitacion(dto));
+
+        if (seCierraAhora) {
+            crearReservaCierreDeHotel(actualizada);
+        }
+    }
+
+    private void crearReservaCierreDeHotel(Habitacion habitacion) {
+        Reserva reserva = Reserva.builder()
+                .idHabitacion(habitacion.getId())
+                .hotelId(habitacion.getHotel() != null ? habitacion.getHotel().getId().longValue() : null)
+                .createdAt(Instant.now())
+                .checkIn(Instant.now())
+                .checkOut(null)
+                .estadoReserva(EstadoReserva.CERRADA)
+                .build();
+        reservaService.save(reserva);
+    }
+
+    private void actualizarPrecioPorTipo(TarifaDTO tarifa) {
+        if (tarifa == null || tarifa.getTipoHabitacionId() == null) {
+            return;
+        }
+        Query query = new Query(Criteria.where("idTipoHabitacion").is(tarifa.getTipoHabitacionId()));
+        Update update = new Update().set("precioNoche", tarifa.getNuevoPrecio());
+        mongoTemplate.updateMulti(query, update, Habitacion.class);
+    }
+
     public Habitacion mapFromHabitacion(HabitacionDTO dto) {
         return Habitacion.builder()
                 .habitacionId(dto.getHabitacionId())
                 .precioNoche(dto.getPrecioNoche())
                 .capacidad(dto.getCapacidad())
+                .disponible(dto.getDisponible())
+                .idTipoHabitacion(dto.getTipoHabitacionId())
+                .tipoHabitacion(dto.getTipoHabitacion())
                 .amenities(dto.getAmenities())
                 .hotel(mapFromDto(dto.getHotel()))
                 .build();
     }
 
-    public Hotel mapFromDto(HotelDTO dto){
-        if(dto == null) {
+    public Hotel mapFromDto(HotelDTO dto) {
+        if (dto == null) {
             return null;
         }
         return Hotel.builder()
@@ -85,7 +132,8 @@ public class HabitacionService {
                 .nombre(dto.getNombre())
                 .domicilio(dto.getDomicilio())
                 .categoria(dto.getCategoria())
-                .ubicacion(new GeoJsonPoint(dto.getLatitud(), dto.getLongitud()))
+                .cerrado(dto.getCerrado())
+                .ubicacion(new GeoJsonPoint(dto.getLongitud(), dto.getLatitud()))
                 .build();
     }
 
@@ -100,7 +148,11 @@ public class HabitacionService {
         Update update = new Update()
                 .set("precioNoche", nuevaHabitacion.getPrecioNoche())
                 .set("capacidad", nuevaHabitacion.getCapacidad())
-                .set("amenities", nuevaHabitacion.getAmenities());
+                .set("disponible", nuevaHabitacion.getDisponible())
+                .set("idTipoHabitacion", nuevaHabitacion.getIdTipoHabitacion())
+                .set("tipoHabitacion", nuevaHabitacion.getTipoHabitacion())
+                .set("amenities", nuevaHabitacion.getAmenities())
+                .set("hotel", nuevaHabitacion.getHotel());
         Habitacion actualizada = mongoTemplate.findAndModify(
                 query,
                 update,

@@ -17,10 +17,9 @@ public class Hotel {
     private String nombre;
     private Integer categoria;
     private String domicilio;
+    private Boolean cerrado;
     @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
-    private GeoJsonPoint ubicacion;          // <-- NUEVO campo geoespacial
-
-    
+    private GeoJsonPoint ubicacion;
 }
 
 
