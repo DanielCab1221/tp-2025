@@ -31,13 +31,6 @@ public class TarifaController {
         return tarifaService.findAll();
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Tarifa> update(@PathVariable Integer id, @RequestBody Tarifa tarifa) {
-        if (!tarifaService.findById(id).isPresent()) return ResponseEntity.notFound().build();
-        tarifa.setId(id);
-        return ResponseEntity.ok(tarifaService.save(tarifa));
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         if (!tarifaService.findById(id).isPresent()) return ResponseEntity.notFound().build();

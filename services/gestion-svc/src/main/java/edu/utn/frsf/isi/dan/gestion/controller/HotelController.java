@@ -33,15 +33,15 @@ public class HotelController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Hotel> update(@PathVariable Integer id, @RequestBody Hotel hotel) {
-        if (!hotelService.findById(id).isPresent()) return ResponseEntity.notFound().build();
-        hotel.setId(id);
-        return ResponseEntity.ok(hotelService.save(hotel));
+        return hotelService.actualizarDatosPermitidos(id, hotel)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
-        if (!hotelService.findById(id).isPresent()) return ResponseEntity.notFound().build();
-        hotelService.deleteById(id);
-        return ResponseEntity.noContent().build();
+    @PatchMapping("/{id}/cerrar")
+    public ResponseEntity<Hotel> cerrar(@PathVariable Integer id) {
+        return hotelService.cerrar(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }
