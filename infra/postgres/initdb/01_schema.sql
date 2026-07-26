@@ -19,8 +19,11 @@ CREATE TABLE IF NOT EXISTS tp_dan.hotel (
     longitud decimal(10,7),
     telefono varchar(30),
     correo_contacto varchar(100),
-    categoria integer NOT NULL
+    categoria integer NOT NULL,
+    cerrado boolean NOT NULL DEFAULT false
 );
+
+ALTER TABLE tp_dan.hotel ADD COLUMN IF NOT EXISTS cerrado boolean NOT NULL DEFAULT false;
 
 -- Tabla tipo_habitacion
 CREATE TABLE IF NOT EXISTS tp_dan.tipo_habitacion (

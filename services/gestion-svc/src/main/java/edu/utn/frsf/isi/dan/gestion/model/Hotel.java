@@ -25,6 +25,8 @@ public class Hotel {
     private String telefono;
     private String correoContacto;
     private Integer categoria;
+    @Builder.Default
+    private Boolean cerrado = false;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "hotel")
     @JsonIgnore
     private List<Habitacion> habitaciones;

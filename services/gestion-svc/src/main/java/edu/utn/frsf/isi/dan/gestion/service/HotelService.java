@@ -17,15 +17,27 @@ public class HotelService {
         return hotelRepository.save(hotel);
     }
 
-    public void deleteById(Integer id) {
-        hotelRepository.deleteById(id);
-    }
-
     public Optional<Hotel> findById(Integer id) {
         return hotelRepository.findById(id);
     }
 
     public List<Hotel> findAll() {
         return hotelRepository.findAll();
+    }
+
+    public Optional<Hotel> actualizarDatosPermitidos(Integer id, Hotel datosActualizados) {
+        return hotelRepository.findById(id).map(hotel -> {
+            hotel.setCategoria(datosActualizados.getCategoria());
+            hotel.setTelefono(datosActualizados.getTelefono());
+            hotel.setCorreoContacto(datosActualizados.getCorreoContacto());
+            return hotelRepository.save(hotel);
+        });
+    }
+
+    public Optional<Hotel> cerrar(Integer id) {
+        return hotelRepository.findById(id).map(hotel -> {
+            hotel.setCerrado(true);
+            return hotelRepository.save(hotel);
+        });
     }
 }
