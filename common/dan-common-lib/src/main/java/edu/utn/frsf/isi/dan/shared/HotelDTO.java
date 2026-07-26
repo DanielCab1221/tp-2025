@@ -15,5 +15,6 @@ public class HotelDTO {
         private String telefono;
         private String correoContacto;
         private Integer categoria;
-   
+        private Boolean cerrado;
+
 }

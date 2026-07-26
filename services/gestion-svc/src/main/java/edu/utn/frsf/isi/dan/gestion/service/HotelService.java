@@ -19,6 +19,9 @@ public class HotelService {
     @Autowired
     private HabitacionRepository habitacionRepository;
 
+    @Autowired
+    private HabitacionService habitacionService;
+
     public Hotel save(Hotel hotel) {
         if (hotel.getId() == null && hotelRepository.existsByCuit(hotel.getCuit())) {
             throw new IllegalArgumentException("Ya existe un hotel registrado con el CUIT: " + hotel.getCuit());
@@ -50,8 +53,10 @@ public class HotelService {
             Hotel hotelCerrado = hotelRepository.save(hotel);
 
             List<Habitacion> habitaciones = habitacionRepository.findByHotelId(id);
-            habitaciones.forEach(habitacion -> habitacion.setDisponible(false));
-            habitacionRepository.saveAll(habitaciones);
+            habitaciones.forEach(habitacion -> {
+                habitacion.setDisponible(false);
+                habitacionService.save(habitacion);
+            });
 
             return hotelCerrado;
         });
