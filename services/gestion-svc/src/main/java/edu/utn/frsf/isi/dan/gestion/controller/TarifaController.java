@@ -16,7 +16,7 @@ public class TarifaController {
 
     @PostMapping
     public ResponseEntity<Tarifa> create(@RequestBody Tarifa tarifa) {
-        return ResponseEntity.ok(tarifaService.save(tarifa));
+        return ResponseEntity.ok(tarifaService.crear(tarifa));
     }
 
     @GetMapping("/{id}")
@@ -33,8 +33,7 @@ public class TarifaController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
-        if (!tarifaService.findById(id).isPresent()) return ResponseEntity.notFound().build();
-        tarifaService.deleteById(id);
+        tarifaService.eliminar(id);
         return ResponseEntity.noContent().build();
     }
 }

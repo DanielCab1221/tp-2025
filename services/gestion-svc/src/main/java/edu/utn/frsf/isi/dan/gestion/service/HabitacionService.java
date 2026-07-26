@@ -2,7 +2,6 @@ package edu.utn.frsf.isi.dan.gestion.service;
 
 import edu.utn.frsf.isi.dan.gestion.dao.HabitacionRepository;
 import edu.utn.frsf.isi.dan.gestion.dao.HotelRepository;
-import edu.utn.frsf.isi.dan.gestion.dao.TarifaRepository;
 import edu.utn.frsf.isi.dan.gestion.model.Habitacion;
 import edu.utn.frsf.isi.dan.gestion.model.Hotel;
 import edu.utn.frsf.isi.dan.gestion.model.Tarifa;
@@ -31,7 +30,7 @@ public class HabitacionService {
     private HotelRepository hotelRepository;
 
     @Autowired
-    private TarifaRepository tarifaRepository;
+    private TarifaService tarifaService;
 
     @Autowired
     private EventPublisherService eventPublisherService;
@@ -58,7 +57,7 @@ public class HabitacionService {
     }
 
     public void enviarHabitacionJms(Habitacion habitacion, boolean isNew) {
-        Double precioVigente = obtenerPrecioVigente(habitacion.getTipoHabitacion().getId());
+        Double precioVigente = tarifaService.obtenerPrecioVigente(habitacion.getTipoHabitacion().getId());
         HotelDTO hotelDto = mapearHotel(habitacion.getHotel());
 
         HabitacionDTO dto = HabitacionDTO.builder()
@@ -88,12 +87,8 @@ public class HabitacionService {
         eventPublisherService.publicar(msgEvent);
     }
 
-    private Double obtenerPrecioVigente(Integer tipoHabitacionId) {
-        LocalDate hoy = LocalDate.now();
-        List<Tarifa> vigentes = tarifaRepository
-                .findByTipoHabitacionIdAndFechaInicioLessThanEqualAndFechaFinGreaterThanEqualOrderByFechaInicioDesc(
-                        tipoHabitacionId, hoy, hoy);
-        return vigentes.isEmpty() ? 0.0 : vigentes.get(0).getPrecioNoche();
+    public Optional<Tarifa> obtenerTarifaVigente(Habitacion habitacion) {
+        return tarifaService.obtenerVigente(habitacion.getTipoHabitacion().getId(), LocalDate.now());
     }
 
     private HotelDTO mapearHotel(Hotel hotelReferenciado) {
