@@ -2,9 +2,11 @@ package edu.utn.frsf.isi.dan.gestion.service;
 
 import edu.utn.frsf.isi.dan.gestion.dao.HabitacionRepository;
 import edu.utn.frsf.isi.dan.gestion.dao.HotelRepository;
+import edu.utn.frsf.isi.dan.gestion.dao.TipoHabitacionRepository;
 import edu.utn.frsf.isi.dan.gestion.model.Habitacion;
 import edu.utn.frsf.isi.dan.gestion.model.Hotel;
 import edu.utn.frsf.isi.dan.gestion.model.Tarifa;
+import edu.utn.frsf.isi.dan.gestion.model.TipoHabitacion;
 import edu.utn.frsf.isi.dan.shared.HabitacionDTO;
 import edu.utn.frsf.isi.dan.shared.HabitacionEvent;
 import edu.utn.frsf.isi.dan.shared.HotelDTO;
@@ -32,6 +34,9 @@ public class HabitacionService {
 
     @Autowired
     private TarifaService tarifaService;
+
+    @Autowired
+    private TipoHabitacionRepository tipoHabitacionRepository;
 
     @Autowired
     private EventPublisherService eventPublisherService;
@@ -77,15 +82,22 @@ public class HabitacionService {
     }
 
     public void enviarHabitacionJms(Habitacion habitacion, boolean isNew) {
-        Double precioVigente = tarifaService.obtenerPrecioVigente(habitacion.getTipoHabitacion().getId());
+        // habitacion.getTipoHabitacion() puede ser solo la referencia suelta que llego en el
+        // request (por ej. {"id": 2}, sin nombre/descripcion/capacidad); se vuelve a buscar en
+        // la base para completar el DTO con los datos reales.
+        TipoHabitacion tipoHabitacion = tipoHabitacionRepository.findById(habitacion.getTipoHabitacion().getId())
+                .orElse(habitacion.getTipoHabitacion());
+        Double precioVigente = tarifaService.obtenerPrecioVigente(tipoHabitacion.getId());
         HotelDTO hotelDto = mapearHotel(habitacion.getHotel());
 
         HabitacionDTO dto = HabitacionDTO.builder()
                 .habitacionId(habitacion.getId().longValue())
                 .numero(habitacion.getNumero())
-                .tipoHabitacionId(habitacion.getTipoHabitacion().getId())
-                .tipoHabitacion(habitacion.getTipoHabitacion().getDescripcion())
-                .capacidad(habitacion.getTipoHabitacion().getCapacidad())
+                .piso(habitacion.getPiso())
+                .tipoHabitacionId(tipoHabitacion.getId())
+                .tipoHabitacion(tipoHabitacion.getNombre())
+                .tipoHabitacionDescripcion(tipoHabitacion.getDescripcion())
+                .capacidad(tipoHabitacion.getCapacidad())
                 .precioNoche(precioVigente)
                 .disponible(habitacion.getDisponible())
                 .hotel(hotelDto)
