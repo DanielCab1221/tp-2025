@@ -1,5 +1,7 @@
 package edu.utn.frsf.isi.dan.user.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import jakarta.persistence.*;
@@ -24,6 +26,7 @@ public class CuentaBancaria {
     private Banco banco;
 
     @OneToOne(mappedBy = "cuentaBancaria")
+    @JsonIgnore
     private Propietario propietario;
 
 }

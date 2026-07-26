@@ -24,7 +24,7 @@
 						"url": "{{baseUrl}}/users/huesped",
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"nombre\": \"Juan Pérez\",\n  \"email\": \"juan@example.com\",\n  \"telefono\": \"+5493414567890\",\n  \"dni\": \"12345678\",\n  \"fechaNacimiento\": \"1990-01-15\",\n  \"tarjetaCredito\": {\n    \"numero\": \"1234567890123456\",\n    \"nombreTitular\": \"JUAN PEREZ\",\n    \"fechaVencimiento\": \"12/25\",\n    \"cvc\": \"123\",\n    \"esPrincipal\": true\n  },\n  \"idBanco\": 1\n}"
+							"raw": "{\n  \"nombre\": \"Juan Pérez\",\n  \"email\": \"juan@example.com\",\n  \"telefono\": \"+5493414567890\",\n  \"dni\": \"12345678\",\n  \"fechaNacimiento\": \"1990-01-15\",\n  \"numeroCC\": \"1234567890123456\",\n  \"nombreTitular\": \"JUAN PEREZ\",\n  \"fechaVencimientoCC\": \"12/25\",\n  \"cvcCC\": \"123\",\n  \"esPrincipalCC\": true,\n  \"idBanco\": 1\n}"
 						}
 					}
 				},
@@ -36,7 +36,7 @@
 						"url": "{{baseUrl}}/users/propietario",
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"nombre\": \"María García\",\n  \"email\": \"maria@example.com\",\n  \"telefono\": \"+5493414567891\",\n  \"dni\": \"87654321\",\n  \"cuentaBancaria\": {\n    \"numeroCuenta\": \"001234567890\",\n    \"cbu\": \"0123456789012345678901\",\n    \"idBanco\": 1\n  }\n}"
+							"raw": "{\n  \"nombre\": \"María García\",\n  \"email\": \"maria@example.com\",\n  \"telefono\": \"+5493414567891\",\n  \"dni\": \"87654321\",\n  \"cuentaBancaria\": {\n    \"numeroCuenta\": \"001234567890\",\n    \"cbu\": \"0123456789012345678901\",\n    \"alias\": \"maria.garcia.banco\",\n    \"idBanco\": 1\n  }\n}"
 						}
 					}
 				},

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface TarjetaCreditoRepository extends JpaRepository<TarjetaCredito, Long> {
+public interface TarjetaCreditoRepository extends JpaRepository<TarjetaCredito, Integer> {
     
     Optional<TarjetaCredito> findByHuespedIdAndEsPrincipalTrue(Integer huespedId);
     

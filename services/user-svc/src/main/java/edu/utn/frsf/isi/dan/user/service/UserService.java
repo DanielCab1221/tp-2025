@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -38,6 +39,7 @@ public class UserService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Transactional
     public Huesped crearUsuarioHuesped(HuespedRecord huespedRecord) {
         // Buscar el banco por ID
         Optional<Banco> bancoOptional = bancoRepository.findById(huespedRecord.idBanco());
@@ -63,6 +65,7 @@ public class UserService {
         return usuario;
     }
 
+    @Transactional
     public void crearUsuarioPropietario(PropietarioRecord propietarioRecord) {
         // Buscar el banco por ID
         Optional<Banco> bancoOptional = bancoRepository.findById(propietarioRecord.cuentaBancaria().idBanco());

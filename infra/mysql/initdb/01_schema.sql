@@ -33,7 +33,7 @@ CREATE TABLE users.tarjetas_credito (
     id INT AUTO_INCREMENT PRIMARY KEY,
     numero_tarjeta VARCHAR(22) NOT NULL,
     nombre_titular VARCHAR(255) NOT NULL,
-    fecha_vencimiento VARCHAR(4) NOT NULL,
+    fecha_vencimiento VARCHAR(10) NOT NULL,
     codigo_seguridad VARCHAR(4) NOT NULL,
     es_principal BIT(1),
     usuario_id INT NOT NULL,
