@@ -22,6 +22,8 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class HabitacionService {
@@ -168,5 +170,71 @@ public class HabitacionService {
     public void deleteByHabitacionId(Long habitacionId) {
         Query query = new Query(Criteria.where("habitacionId").is(habitacionId));
         mongoTemplate.remove(query, Habitacion.class);
+    }
+
+    /**
+     * Filtra primero por los criterios que son propios de la habitacion/hotel (capacidad,
+     * precio, categoria, amenities, cercania), y sobre ese subconjunto descarta las que tengan
+     * alguna reserva activa que se solape con el rango pedido. Se hace en dos pasos porque la
+     * disponibilidad por fechas depende de la coleccion Reserva, no de Habitacion.
+     */
+    public List<Habitacion> buscarDisponibles(Instant checkIn, Instant checkOut, Integer huespedesMinimos,
+                                                Double precioMin, Double precioMax, Integer categoriaMinima,
+                                                List<String> amenities, Double latitud, Double longitud,
+                                                Double distanciaMaximaKm) {
+        if (checkIn == null || checkOut == null || !checkIn.isBefore(checkOut)) {
+            throw new IllegalArgumentException("El rango checkIn/checkOut es invalido: checkIn debe ser anterior a checkOut");
+        }
+
+        Query query = new Query();
+        query.addCriteria(Criteria.where("disponible").is(true));
+        if (huespedesMinimos != null) {
+            query.addCriteria(Criteria.where("capacidad").gte(huespedesMinimos));
+        }
+        if (precioMin != null) {
+            query.addCriteria(Criteria.where("precioNoche").gte(precioMin));
+        }
+        if (precioMax != null) {
+            query.addCriteria(Criteria.where("precioNoche").lte(precioMax));
+        }
+        if (categoriaMinima != null) {
+            query.addCriteria(Criteria.where("hotel.categoria").gte(categoriaMinima));
+        }
+        if (amenities != null && !amenities.isEmpty()) {
+            query.addCriteria(Criteria.where("amenities").all(amenities));
+        }
+        if (latitud != null && longitud != null) {
+            double maxDistanciaMetros = (distanciaMaximaKm != null ? distanciaMaximaKm : 10) * 1000;
+            query.addCriteria(Criteria.where("hotel.ubicacion")
+                    .near(new GeoJsonPoint(longitud, latitud))
+                    .maxDistance(maxDistanciaMetros));
+        }
+
+        List<Habitacion> candidatas = mongoTemplate.find(query, Habitacion.class);
+        if (candidatas.isEmpty()) {
+            return candidatas;
+        }
+
+        List<String> idsCandidatas = candidatas.stream().map(Habitacion::getId).collect(Collectors.toList());
+        Set<String> idsOcupadas = idsConReservaQueSolapa(idsCandidatas, checkIn, checkOut);
+
+        return candidatas.stream()
+                .filter(h -> !idsOcupadas.contains(h.getId()))
+                .collect(Collectors.toList());
+    }
+
+    private Set<String> idsConReservaQueSolapa(List<String> idsHabitacion, Instant checkIn, Instant checkOut) {
+        Query query = new Query(new Criteria().andOperator(
+                Criteria.where("idHabitacion").in(idsHabitacion),
+                Criteria.where("estadoReserva").ne(EstadoReserva.CANCELADA),
+                Criteria.where("checkIn").lt(checkOut),
+                new Criteria().orOperator(
+                        Criteria.where("checkOut").is(null),
+                        Criteria.where("checkOut").gt(checkIn)
+                )
+        ));
+        return mongoTemplate.find(query, Reserva.class).stream()
+                .map(Reserva::getIdHabitacion)
+                .collect(Collectors.toSet());
     }
 }
