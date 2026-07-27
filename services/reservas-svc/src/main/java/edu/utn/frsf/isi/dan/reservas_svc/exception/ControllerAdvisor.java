@@ -21,6 +21,11 @@ public class ControllerAdvisor {
         return build(ex.getMessage(), request, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(RecursoNoEncontradoException.class)
+    public ResponseEntity<ExceptionInfo> handleRecursoNoEncontradoException(RecursoNoEncontradoException ex, WebRequest request) {
+        return build(ex.getMessage(), request, HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ExceptionInfo> handleValidationException(MethodArgumentNotValidException ex, WebRequest request) {
         String errorMessage = ex.getBindingResult().getFieldErrors().stream()
