@@ -88,7 +88,8 @@ public class HabitacionService {
         TipoHabitacion tipoHabitacion = tipoHabitacionRepository.findById(habitacion.getTipoHabitacion().getId())
                 .orElse(habitacion.getTipoHabitacion());
         Double precioVigente = tarifaService.obtenerPrecioVigente(tipoHabitacion.getId());
-        HotelDTO hotelDto = mapearHotel(habitacion.getHotel());
+        Hotel hotelCompleto = obtenerHotelCompleto(habitacion.getHotel());
+        HotelDTO hotelDto = mapearHotel(hotelCompleto);
 
         HabitacionDTO dto = HabitacionDTO.builder()
                 .habitacionId(habitacion.getId().longValue())
@@ -100,6 +101,10 @@ public class HabitacionService {
                 .capacidad(tipoHabitacion.getCapacidad())
                 .precioNoche(precioVigente)
                 .disponible(habitacion.getDisponible())
+                // Habitacion no tiene amenities propios: se propagan los del hotel al que
+                // pertenece, para que reservas-svc pueda filtrar la busqueda de disponibilidad
+                // por amenity (la habitacion "hereda" las comodidades de su hotel).
+                .amenities(mapearAmenities(hotelCompleto))
                 .hotel(hotelDto)
                 .build();
         HabitacionEvent msgEvent = HabitacionEvent.builder()
@@ -123,23 +128,37 @@ public class HabitacionService {
         return tarifaService.obtenerVigente(habitacion.getTipoHabitacion().getId(), LocalDate.now());
     }
 
-    private HotelDTO mapearHotel(Hotel hotelReferenciado) {
+    private Hotel obtenerHotelCompleto(Hotel hotelReferenciado) {
         if (hotelReferenciado == null || hotelReferenciado.getId() == null) {
             return null;
         }
-        Optional<Hotel> hotel = hotelRepository.findById(hotelReferenciado.getId());
-        return hotel.map(h -> HotelDTO.builder()
-                .id(h.getId())
-                .nombre(h.getNombre())
-                .cuit(h.getCuit())
-                .domicilio(h.getDomicilio())
-                .latitud(h.getLatitud())
-                .longitud(h.getLongitud())
-                .telefono(h.getTelefono())
-                .correoContacto(h.getCorreoContacto())
-                .categoria(h.getCategoria())
-                .cerrado(h.getCerrado())
-                .build()
-        ).orElse(null);
+        return hotelRepository.findById(hotelReferenciado.getId()).orElse(null);
+    }
+
+    private HotelDTO mapearHotel(Hotel hotel) {
+        if (hotel == null) {
+            return null;
+        }
+        return HotelDTO.builder()
+                .id(hotel.getId())
+                .nombre(hotel.getNombre())
+                .cuit(hotel.getCuit())
+                .domicilio(hotel.getDomicilio())
+                .latitud(hotel.getLatitud())
+                .longitud(hotel.getLongitud())
+                .telefono(hotel.getTelefono())
+                .correoContacto(hotel.getCorreoContacto())
+                .categoria(hotel.getCategoria())
+                .cerrado(hotel.getCerrado())
+                .build();
+    }
+
+    private List<String> mapearAmenities(Hotel hotel) {
+        if (hotel == null || hotel.getAmenities() == null) {
+            return List.of();
+        }
+        return hotel.getAmenities().stream()
+                .map(amenityHotel -> amenityHotel.getAmenity().name())
+                .collect(Collectors.toList());
     }
 }
