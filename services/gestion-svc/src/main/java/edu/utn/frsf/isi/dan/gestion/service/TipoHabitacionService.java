@@ -14,6 +14,12 @@ public class TipoHabitacionService {
     private TipoHabitacionRepository tipoHabitacionRepository;
 
     public TipoHabitacion save(TipoHabitacion tipoHabitacion) {
+        // El id no es autogenerado (tipo_habitacion es un catalogo fijo, precargado por schema
+        // con ids del 1 al 9): sin este chequeo, Hibernate rechaza el insert con una excepcion
+        // de bajo nivel que el ControllerAdvisor termina devolviendo como 500.
+        if (tipoHabitacion.getId() == null) {
+            throw new IllegalArgumentException("El id del tipo de habitacion es requerido");
+        }
         return tipoHabitacionRepository.save(tipoHabitacion);
     }
 

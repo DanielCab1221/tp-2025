@@ -5,6 +5,7 @@ import edu.utn.frsf.isi.dan.user.dto.BancoDTO;
 import edu.utn.frsf.isi.dan.user.model.Banco;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -46,6 +47,10 @@ public class BancoService {
         if (!bancoRepository.existsById(id)) {
             throw new IllegalArgumentException("Banco no encontrado con ID: " + id);
         }
-        bancoRepository.deleteById(id);
+        try {
+            bancoRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalStateException("No se puede eliminar el banco porque esta referenciado por una tarjeta o cuenta bancaria");
+        }
     }
 }
