@@ -1,6 +1,8 @@
 package edu.utn.frsf.isi.dan.reservas_svc.controller;
 
+import edu.utn.frsf.isi.dan.reservas_svc.model.Pago;
 import edu.utn.frsf.isi.dan.reservas_svc.model.Reserva;
+import edu.utn.frsf.isi.dan.reservas_svc.model.Review;
 import edu.utn.frsf.isi.dan.reservas_svc.service.ReservaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -61,5 +63,25 @@ public class ReservaController {
     @PatchMapping("/{id}/checkout")
     public Reserva checkOut(@PathVariable String id) {
         return reservaService.registrarCheckOut(id);
+    }
+
+    @PostMapping("/{id}/pagos")
+    public Reserva registrarPago(@PathVariable String id, @RequestBody Pago pago) {
+        return reservaService.registrarPago(id, pago);
+    }
+
+    @GetMapping("/{id}/pagos")
+    public List<Pago> getPagos(@PathVariable String id) {
+        return reservaService.obtenerPagos(id);
+    }
+
+    @PostMapping("/{id}/review-cliente")
+    public Reserva registrarReviewCliente(@PathVariable String id, @RequestBody Review review) {
+        return reservaService.registrarReviewCliente(id, review);
+    }
+
+    @PostMapping("/{id}/review-hotel")
+    public Reserva registrarReviewHotel(@PathVariable String id, @RequestBody Review review) {
+        return reservaService.registrarReviewHotel(id, review);
     }
 }

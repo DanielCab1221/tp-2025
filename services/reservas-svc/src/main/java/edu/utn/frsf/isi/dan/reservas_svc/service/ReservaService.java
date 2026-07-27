@@ -5,6 +5,7 @@ import edu.utn.frsf.isi.dan.reservas_svc.model.EstadoReserva;
 import edu.utn.frsf.isi.dan.reservas_svc.model.Habitacion;
 import edu.utn.frsf.isi.dan.reservas_svc.model.Pago;
 import edu.utn.frsf.isi.dan.reservas_svc.model.Reserva;
+import edu.utn.frsf.isi.dan.reservas_svc.model.Review;
 import edu.utn.frsf.isi.dan.reservas_svc.repository.HabitacionRepository;
 import edu.utn.frsf.isi.dan.reservas_svc.repository.ReservaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -20,6 +22,10 @@ import java.util.Set;
 public class ReservaService {
     private static final Set<EstadoReserva> CANCELABLES = Set.of(
             EstadoReserva.RESERVADA, EstadoReserva.CONFIRMADA, EstadoReserva.BLOQUEADA);
+    private static final Set<EstadoReserva> ACEPTAN_PAGO = Set.of(
+            EstadoReserva.RESERVADA, EstadoReserva.CONFIRMADA, EstadoReserva.EFECTUADA, EstadoReserva.ADEUDADA);
+    private static final Set<EstadoReserva> ACEPTAN_REVIEW_HOTEL = Set.of(
+            EstadoReserva.EFECTUADA, EstadoReserva.FINALIZADA, EstadoReserva.ADEUDADA);
 
     @Autowired
     private ReservaRepository reservaRepository;
@@ -135,9 +141,65 @@ public class ReservaService {
         if (reserva.getClientReview() == null) {
             throw new IllegalArgumentException("No se puede finalizar la reserva sin que el huesped deje un review");
         }
-        double totalPagado = totalPagado(reserva);
-        boolean pagoCompleto = reserva.getPrecioTotal() != null && totalPagado >= reserva.getPrecioTotal();
-        reserva.setEstadoReserva(pagoCompleto ? EstadoReserva.FINALIZADA : EstadoReserva.ADEUDADA);
+        reserva.setEstadoReserva(pagoCompleto(reserva) ? EstadoReserva.FINALIZADA : EstadoReserva.ADEUDADA);
+        return reservaRepository.save(reserva);
+    }
+
+    public Reserva registrarPago(String id, Pago pago) {
+        if (pago == null || pago.getAmount() == null || pago.getAmount().getPrecio() == null || pago.getAmount().getPrecio() <= 0) {
+            throw new IllegalArgumentException("El pago debe tener un monto (amount.precio) mayor a cero");
+        }
+        Reserva reserva = obtenerOFallar(id);
+        if (!ACEPTAN_PAGO.contains(reserva.getEstadoReserva())) {
+            throw new IllegalArgumentException(
+                    "No se pueden registrar pagos para una reserva en estado " + reserva.getEstadoReserva());
+        }
+
+        if (reserva.getPago() == null) {
+            reserva.setPago(new ArrayList<>());
+        }
+        reserva.getPago().add(pago);
+
+        if (reserva.getEstadoReserva() == EstadoReserva.RESERVADA && alcanzaMinimoParaConfirmar(reserva)) {
+            reserva.setEstadoReserva(EstadoReserva.CONFIRMADA);
+        } else if (reserva.getEstadoReserva() == EstadoReserva.ADEUDADA && pagoCompleto(reserva)) {
+            reserva.setEstadoReserva(EstadoReserva.FINALIZADA);
+        }
+        return reservaRepository.save(reserva);
+    }
+
+    public List<Pago> obtenerPagos(String id) {
+        Reserva reserva = obtenerOFallar(id);
+        return reserva.getPago() != null ? reserva.getPago() : List.of();
+    }
+
+    private boolean alcanzaMinimoParaConfirmar(Reserva reserva) {
+        return reserva.getPrecioTotal() != null && totalPagado(reserva) >= reserva.getPrecioTotal() * 0.5;
+    }
+
+    private boolean pagoCompleto(Reserva reserva) {
+        return reserva.getPrecioTotal() != null && totalPagado(reserva) >= reserva.getPrecioTotal();
+    }
+
+    public Reserva registrarReviewCliente(String id, Review review) {
+        Reserva reserva = obtenerOFallar(id);
+        if (reserva.getEstadoReserva() != EstadoReserva.EFECTUADA) {
+            throw new IllegalArgumentException(
+                    "El huesped solo puede dejar un review con la reserva en estado EFECTUADA (estado actual: " + reserva.getEstadoReserva() + ")");
+        }
+        review.setCreatedAt(Instant.now().toString());
+        reserva.setClientReview(review);
+        return reservaRepository.save(reserva);
+    }
+
+    public Reserva registrarReviewHotel(String id, Review review) {
+        Reserva reserva = obtenerOFallar(id);
+        if (!ACEPTAN_REVIEW_HOTEL.contains(reserva.getEstadoReserva())) {
+            throw new IllegalArgumentException(
+                    "El hotel solo puede dejar un review de una reserva efectuada (estado actual: " + reserva.getEstadoReserva() + ")");
+        }
+        review.setCreatedAt(Instant.now().toString());
+        reserva.setHostReview(review);
         return reservaRepository.save(reserva);
     }
 
