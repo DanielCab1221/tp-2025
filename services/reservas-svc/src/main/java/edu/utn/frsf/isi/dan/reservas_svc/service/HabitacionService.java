@@ -34,6 +34,9 @@ public class HabitacionService {
     private ReservaService reservaService;
 
     @Autowired
+    private DisponibilidadService disponibilidadService;
+
+    @Autowired
     private MongoTemplate mongoTemplate;
 
     public List<Habitacion> findAll() {
@@ -216,25 +219,10 @@ public class HabitacionService {
         }
 
         List<String> idsCandidatas = candidatas.stream().map(Habitacion::getId).collect(Collectors.toList());
-        Set<String> idsOcupadas = idsConReservaQueSolapa(idsCandidatas, checkIn, checkOut);
+        Set<String> idsOcupadas = disponibilidadService.idsConReservaQueSolapa(idsCandidatas, checkIn, checkOut);
 
         return candidatas.stream()
                 .filter(h -> !idsOcupadas.contains(h.getId()))
                 .collect(Collectors.toList());
-    }
-
-    private Set<String> idsConReservaQueSolapa(List<String> idsHabitacion, Instant checkIn, Instant checkOut) {
-        Query query = new Query(new Criteria().andOperator(
-                Criteria.where("idHabitacion").in(idsHabitacion),
-                Criteria.where("estadoReserva").ne(EstadoReserva.CANCELADA),
-                Criteria.where("checkIn").lt(checkOut),
-                new Criteria().orOperator(
-                        Criteria.where("checkOut").is(null),
-                        Criteria.where("checkOut").gt(checkIn)
-                )
-        ));
-        return mongoTemplate.find(query, Reserva.class).stream()
-                .map(Reserva::getIdHabitacion)
-                .collect(Collectors.toSet());
     }
 }
