@@ -138,8 +138,22 @@ public class HabitacionService {
                 .domicilio(dto.getDomicilio())
                 .categoria(dto.getCategoria())
                 .cerrado(dto.getCerrado())
-                .ubicacion(new GeoJsonPoint(dto.getLongitud(), dto.getLatitud()))
+                .ubicacion(buildUbicacion(dto.getLatitud(), dto.getLongitud()))
                 .build();
+    }
+
+    /**
+     * El hotel puede no tener lat/long cargadas (son opcionales en gestion-svc). Sin este
+     * chequeo, el unboxing de un Double null en el constructor de GeoJsonPoint (que pide
+     * double primitivo) tira NPE y el evento se pierde silenciosamente: la habitación nunca
+     * llega a reservas-svc. Sin ubicacion, el hotel simplemente no participa de búsquedas por
+     * cercanía ($near ya viene guardado con un chequeo propio de null en buscarDisponibles).
+     */
+    private GeoJsonPoint buildUbicacion(Double latitud, Double longitud) {
+        if (latitud == null || longitud == null) {
+            return null;
+        }
+        return new GeoJsonPoint(longitud, latitud);
     }
 
     public Optional<Habitacion> findByHabitacionId(Long habitacionId) {
