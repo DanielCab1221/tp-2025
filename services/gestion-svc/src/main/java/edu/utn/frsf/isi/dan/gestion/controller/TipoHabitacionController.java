@@ -2,6 +2,8 @@ package edu.utn.frsf.isi.dan.gestion.controller;
 
 import edu.utn.frsf.isi.dan.gestion.model.TipoHabitacion;
 import edu.utn.frsf.isi.dan.gestion.service.TipoHabitacionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
  *
  * <p>Las rutas expuestas por este controlador están bajo el prefijo <code>/tipos-habitacion</code>.
  */
+@Tag(name = "Tipo Habitacion Controller", description = "CRUD de tipos de habitación")
 @RestController
 @RequestMapping("/tipos-habitacion")
 public class TipoHabitacionController {
@@ -24,6 +27,7 @@ public class TipoHabitacionController {
    * @param tipoHabitacion datos del tipo de habitación a crear
    * @return el tipo de habitación creado
    */
+  @Operation(summary = "Crear tipo de habitación")
   @PostMapping
   public ResponseEntity<TipoHabitacion> create(@RequestBody TipoHabitacion tipoHabitacion) {
     return ResponseEntity.ok(tipoHabitacionService.save(tipoHabitacion));
@@ -35,6 +39,7 @@ public class TipoHabitacionController {
    * @param id identificador del tipo de habitación
    * @return el tipo de habitación encontrado, o 404 Not Found si no existe
    */
+  @Operation(summary = "Obtener tipo de habitación por ID")
   @GetMapping("/{id}")
   public ResponseEntity<TipoHabitacion> getById(@PathVariable Integer id) {
     return tipoHabitacionService
@@ -48,6 +53,7 @@ public class TipoHabitacionController {
    *
    * @return la lista completa de tipos de habitación
    */
+  @Operation(summary = "Listar tipos de habitación")
   @GetMapping
   public List<TipoHabitacion> getAll() {
     return tipoHabitacionService.findAll();
@@ -60,6 +66,7 @@ public class TipoHabitacionController {
    * @param tipoHabitacion nuevos datos del tipo de habitación
    * @return el tipo de habitación actualizado, o 404 Not Found si no existe
    */
+  @Operation(summary = "Actualizar tipo de habitación")
   @PutMapping("/{id}")
   public ResponseEntity<TipoHabitacion> update(
       @PathVariable Integer id, @RequestBody TipoHabitacion tipoHabitacion) {
@@ -74,6 +81,7 @@ public class TipoHabitacionController {
    * @param id identificador del tipo de habitación a eliminar
    * @return 204 No Content si se eliminó correctamente, o 404 Not Found si no existe
    */
+  @Operation(summary = "Eliminar tipo de habitación")
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(@PathVariable Integer id) {
     if (!tipoHabitacionService.findById(id).isPresent()) return ResponseEntity.notFound().build();

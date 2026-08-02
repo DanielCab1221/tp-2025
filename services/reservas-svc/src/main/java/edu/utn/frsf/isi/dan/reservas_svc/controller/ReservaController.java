@@ -4,6 +4,8 @@ import edu.utn.frsf.isi.dan.reservas_svc.model.Pago;
 import edu.utn.frsf.isi.dan.reservas_svc.model.Reserva;
 import edu.utn.frsf.isi.dan.reservas_svc.model.Review;
 import edu.utn.frsf.isi.dan.reservas_svc.service.ReservaService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
  *
  * <p>Las rutas expuestas por este controlador están bajo el prefijo <code>/reservas</code>.
  */
+@Tag(name = "Reserva Controller", description = "Ciclo de vida de las reservas")
 @RestController
 @RequestMapping("/reservas")
 public class ReservaController {
@@ -29,6 +32,7 @@ public class ReservaController {
    * @param idUsuario identificador del usuario a filtrar (opcional)
    * @return la lista de reservas encontradas
    */
+  @Operation(summary = "Listar reservas")
   @GetMapping
   public List<Reserva> getAll(@RequestParam(required = false) String idUsuario) {
     if (idUsuario == null) {
@@ -43,6 +47,7 @@ public class ReservaController {
    * @param id identificador de la reserva
    * @return la reserva encontrada, o 404 Not Found si no existe
    */
+  @Operation(summary = "Obtener reserva por ID")
   @GetMapping("/{id}")
   public ResponseEntity<Reserva> getById(@PathVariable String id) {
     return reservaService
@@ -57,6 +62,7 @@ public class ReservaController {
    * @param reserva datos de la reserva a crear
    * @return la reserva creada
    */
+  @Operation(summary = "Crear reserva")
   @PostMapping
   public Reserva create(@RequestBody Reserva reserva) {
     return reservaService.crear(reserva);
@@ -71,6 +77,10 @@ public class ReservaController {
    * @param checkOut fecha de fin del bloqueo
    * @return la reserva de bloqueo creada
    */
+  @Operation(
+      summary = "Bloquear habitación",
+      description =
+          "Crea un bloqueo temporal sobre una habitación para un rango de fechas, impidiendo que sea reservada mientras dura el bloqueo.")
   @PostMapping("/bloqueos")
   public Reserva bloquear(
       @RequestParam String idHabitacion,
@@ -88,6 +98,7 @@ public class ReservaController {
    * @param id identificador de la reserva a cancelar
    * @return la reserva actualizada con su nuevo estado
    */
+  @Operation(summary = "Cancelar reserva")
   @PatchMapping("/{id}/cancelar")
   public Reserva cancelar(@PathVariable String id) {
     return reservaService.cancelar(id);
@@ -99,6 +110,7 @@ public class ReservaController {
    * @param id identificador de la reserva
    * @return la reserva actualizada con su nuevo estado
    */
+  @Operation(summary = "Registrar check-in")
   @PatchMapping("/{id}/checkin")
   public Reserva checkIn(@PathVariable String id) {
     return reservaService.registrarCheckIn(id);
@@ -110,6 +122,7 @@ public class ReservaController {
    * @param id identificador de la reserva
    * @return la reserva actualizada con su nuevo estado
    */
+  @Operation(summary = "Registrar check-out")
   @PatchMapping("/{id}/checkout")
   public Reserva checkOut(@PathVariable String id) {
     return reservaService.registrarCheckOut(id);
@@ -122,6 +135,7 @@ public class ReservaController {
    * @param pago datos del pago a registrar
    * @return la reserva actualizada con el pago registrado
    */
+  @Operation(summary = "Registrar pago")
   @PostMapping("/{id}/pagos")
   public Reserva registrarPago(@PathVariable String id, @RequestBody Pago pago) {
     return reservaService.registrarPago(id, pago);
@@ -133,6 +147,7 @@ public class ReservaController {
    * @param id identificador de la reserva
    * @return la lista de pagos de la reserva
    */
+  @Operation(summary = "Listar pagos de una reserva")
   @GetMapping("/{id}/pagos")
   public List<Pago> getPagos(@PathVariable String id) {
     return reservaService.obtenerPagos(id);
@@ -145,6 +160,7 @@ public class ReservaController {
    * @param review datos de la review a registrar
    * @return la reserva actualizada con la review registrada
    */
+  @Operation(summary = "Registrar review del cliente al hotel")
   @PostMapping("/{id}/review-cliente")
   public Reserva registrarReviewCliente(@PathVariable String id, @RequestBody Review review) {
     return reservaService.registrarReviewCliente(id, review);
@@ -157,6 +173,7 @@ public class ReservaController {
    * @param review datos de la review a registrar
    * @return la reserva actualizada con la review registrada
    */
+  @Operation(summary = "Registrar review del hotel al cliente")
   @PostMapping("/{id}/review-hotel")
   public Reserva registrarReviewHotel(@PathVariable String id, @RequestBody Review review) {
     return reservaService.registrarReviewHotel(id, review);

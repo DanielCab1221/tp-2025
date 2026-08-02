@@ -19,12 +19,15 @@ package edu.utn.frsf.isi.dan.gestion.controller;
 import edu.utn.frsf.isi.dan.gestion.model.Habitacion;
 import edu.utn.frsf.isi.dan.gestion.model.Tarifa;
 import edu.utn.frsf.isi.dan.gestion.service.HabitacionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Habitacion Controller", description = "CRUD y consulta de habitaciones")
 @RestController
 @RequestMapping("/habitaciones")
 public class HabitacionController {
@@ -36,6 +39,7 @@ public class HabitacionController {
    * @param habitacion datos de la habitación a crear
    * @return la habitación creada
    */
+  @Operation(summary = "Crear habitación")
   @PostMapping
   public ResponseEntity<Habitacion> create(@Valid @RequestBody Habitacion habitacion) {
     return ResponseEntity.ok(habitacionService.save(habitacion));
@@ -47,6 +51,7 @@ public class HabitacionController {
    * @param id identificador de la habitación
    * @return la habitación encontrada, o 404 Not Found si no existe
    */
+  @Operation(summary = "Obtener habitación por ID")
   @GetMapping("/{id}")
   public ResponseEntity<Habitacion> getById(@PathVariable Integer id) {
     return habitacionService
@@ -67,6 +72,10 @@ public class HabitacionController {
    * @param precioMax precio máximo (opcional)
    * @return la lista de habitaciones que coinciden con los filtros, o todas si no se indica ninguno
    */
+  @Operation(
+      summary = "Listar/buscar habitaciones",
+      description =
+          "Lista todas las habitaciones o filtra por tipo, capacidad, disponibilidad, hotel y rango de precio.")
   @GetMapping
   public List<Habitacion> getAll(
       @RequestParam(required = false) Integer tipoHabitacionId,
@@ -94,6 +103,7 @@ public class HabitacionController {
    * @return la tarifa vigente, o 404 Not Found si la habitación no existe o no tiene una tarifa
    *     vigente
    */
+  @Operation(summary = "Obtener tarifa vigente de una habitación")
   @GetMapping("/{id}/tarifa-vigente")
   public ResponseEntity<Tarifa> getTarifaVigente(@PathVariable Integer id) {
     return habitacionService
@@ -110,6 +120,7 @@ public class HabitacionController {
    * @param habitacion nuevos datos de la habitación
    * @return la habitación actualizada, o 404 Not Found si no existe
    */
+  @Operation(summary = "Actualizar habitación")
   @PutMapping("/{id}")
   public ResponseEntity<Habitacion> update(
       @PathVariable Integer id, @Valid @RequestBody Habitacion habitacion) {
@@ -124,6 +135,7 @@ public class HabitacionController {
    * @param id identificador de la habitación a eliminar
    * @return 204 No Content si se eliminó correctamente, o 404 Not Found si no existe
    */
+  @Operation(summary = "Eliminar habitación")
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(@PathVariable Integer id) {
     if (!habitacionService.findById(id).isPresent()) return ResponseEntity.notFound().build();
