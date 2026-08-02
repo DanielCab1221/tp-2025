@@ -176,7 +176,6 @@ Disponibles una vez levantada la infra con Docker Compose:
 
 - **Etapa 1** — Consigna: [`ETAPA01.md`](./ETAPA01.md) · ejemplos de uso: [`ETAPA01_CURLS.md`](./ETAPA01_CURLS.md)
 - **Etapa 2** — Consigna: [`ETAPA02.md`](./ETAPA02.md) · guía paso a paso: [`PRACTICA_02.pdf`](PRACTICA_02.pdf) · enunciado completo: [`TP_PARTE_02.pdf`](TP_PARTE_02.pdf)
-- **Documentación de desarrollo**: [`DOCUMENTACION_DESARROLLO.md`](./DOCUMENTACION_DESARROLLO.md)
 - **Colecciones Postman**: [`postman/`](./postman)
 
 ## Licencia
