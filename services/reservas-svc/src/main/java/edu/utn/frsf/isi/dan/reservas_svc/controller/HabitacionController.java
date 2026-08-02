@@ -2,6 +2,8 @@ package edu.utn.frsf.isi.dan.reservas_svc.controller;
 
 import edu.utn.frsf.isi.dan.reservas_svc.model.Habitacion;
 import edu.utn.frsf.isi.dan.reservas_svc.service.HabitacionService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
  *
  * <p>Las rutas expuestas por este controlador están bajo el prefijo <code>/habitaciones</code>.
  */
+@Tag(name = "Habitacion Controller", description = "Consulta de habitaciones y disponibilidad")
 @RestController
 @RequestMapping("/habitaciones")
 public class HabitacionController {
@@ -27,6 +30,7 @@ public class HabitacionController {
    *
    * @return la lista completa de habitaciones
    */
+  @Operation(summary = "Listar habitaciones")
   @GetMapping
   public List<Habitacion> getAll() {
     return habitacionService.findAll();
@@ -38,6 +42,7 @@ public class HabitacionController {
    * @param id identificador de la habitación
    * @return la habitación encontrada, o 404 Not Found si no existe
    */
+  @Operation(summary = "Obtener habitación por ID")
   @GetMapping("/{id}")
   public ResponseEntity<Habitacion> getById(@PathVariable String id) {
     return habitacionService
@@ -64,6 +69,10 @@ public class HabitacionController {
    *     (opcional)
    * @return la lista de habitaciones disponibles que cumplen los criterios indicados
    */
+  @Operation(
+      summary = "Buscar habitaciones disponibles",
+      description =
+          "Busca habitaciones disponibles para un rango de fechas, con filtros opcionales de huéspedes, precio, categoría, amenities y ubicación.")
   @GetMapping("/disponibles")
   public List<Habitacion> buscarDisponibles(
       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkIn,

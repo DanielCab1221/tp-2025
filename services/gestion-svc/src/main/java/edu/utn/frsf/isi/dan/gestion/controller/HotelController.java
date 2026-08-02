@@ -3,6 +3,8 @@ package edu.utn.frsf.isi.dan.gestion.controller;
 import edu.utn.frsf.isi.dan.gestion.model.Amenity;
 import edu.utn.frsf.isi.dan.gestion.model.Hotel;
 import edu.utn.frsf.isi.dan.gestion.service.HotelService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
  *
  * <p>Las rutas expuestas por este controlador están bajo el prefijo <code>/hoteles</code>.
  */
+@Tag(name = "Hotel Controller", description = "CRUD, búsqueda y administración de hoteles")
 @RestController
 @RequestMapping("/hoteles")
 public class HotelController {
@@ -25,6 +28,7 @@ public class HotelController {
    * @param hotel datos del hotel a crear
    * @return el hotel creado
    */
+  @Operation(summary = "Crear hotel")
   @PostMapping
   public ResponseEntity<Hotel> create(@RequestBody Hotel hotel) {
     return ResponseEntity.ok(hotelService.save(hotel));
@@ -36,6 +40,7 @@ public class HotelController {
    * @param id identificador del hotel
    * @return el hotel encontrado, o 404 Not Found si no existe
    */
+  @Operation(summary = "Obtener hotel por ID")
   @GetMapping("/{id}")
   public ResponseEntity<Hotel> getById(@PathVariable Integer id) {
     return hotelService
@@ -55,6 +60,10 @@ public class HotelController {
    * @param amenity amenity que debe poseer el hotel (opcional)
    * @return la lista de hoteles que coinciden con los filtros, o todos si no se indica ninguno
    */
+  @Operation(
+      summary = "Listar/buscar hoteles",
+      description =
+          "Lista todos los hoteles o filtra por nombre, categoría, domicilio, estado de cierre y amenity.")
   @GetMapping
   public List<Hotel> getAll(
       @RequestParam(required = false) String nombre,
@@ -79,6 +88,7 @@ public class HotelController {
    * @param hotel nuevos datos del hotel
    * @return el hotel actualizado, o 404 Not Found si no existe
    */
+  @Operation(summary = "Actualizar hotel")
   @PutMapping("/{id}")
   public ResponseEntity<Hotel> update(@PathVariable Integer id, @RequestBody Hotel hotel) {
     return hotelService
@@ -93,6 +103,7 @@ public class HotelController {
    * @param id identificador del hotel a cerrar
    * @return el hotel actualizado, o 404 Not Found si no existe
    */
+  @Operation(summary = "Cerrar hotel")
   @PatchMapping("/{id}/cerrar")
   public ResponseEntity<Hotel> cerrar(@PathVariable Integer id) {
     return hotelService
@@ -108,6 +119,7 @@ public class HotelController {
    * @param amenities lista de amenities a agregar
    * @return el hotel actualizado con las amenities agregadas
    */
+  @Operation(summary = "Agregar amenities a un hotel")
   @PutMapping("/{id}/amenities")
   public ResponseEntity<Hotel> agregarAmenities(
       @PathVariable Integer id, @RequestBody List<Amenity> amenities) {
@@ -121,6 +133,7 @@ public class HotelController {
    * @param amenity amenity a quitar
    * @return 204 No Content una vez quitada la amenity
    */
+  @Operation(summary = "Quitar amenity de un hotel")
   @DeleteMapping("/{id}/amenities/{amenity}")
   public ResponseEntity<Void> quitarAmenity(
       @PathVariable Integer id, @PathVariable Amenity amenity) {

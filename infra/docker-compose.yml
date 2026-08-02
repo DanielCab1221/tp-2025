@@ -117,11 +117,11 @@ services:
     ports:
       - "8081:8080"
     depends_on:
-      - mongodb
       - mysql
-      - rabbitmq
     environment:
       SPRING_PROFILES_ACTIVE: default
+      DB_USERNAME: usr_app
+      DB_PASSWORD: usrapp
 
   reservas-svc:
     build:
@@ -135,6 +135,8 @@ services:
       - rabbitmq
     environment:
       SPRING_PROFILES_ACTIVE: default
+      DB_USERNAME: root
+      DB_PASSWORD: rootpwd
 
   gestion-svc:
     build:
@@ -144,10 +146,12 @@ services:
     ports:
       - "8083:8080"
     depends_on:
-      - mysql
+      - postgres
       - rabbitmq
     environment:
       SPRING_PROFILES_ACTIVE: default
+      DB_USERNAME: appuser
+      DB_PASSWORD: apppwd
 
 
 
