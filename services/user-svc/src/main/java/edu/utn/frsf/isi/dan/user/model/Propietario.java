@@ -1,9 +1,9 @@
 package edu.utn.frsf.isi.dan.user.model;
 
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import jakarta.persistence.*;
 
 @Entity
 @DiscriminatorValue("PROPIETARIO")
@@ -12,13 +12,13 @@ import jakarta.persistence.*;
 @EqualsAndHashCode(callSuper = true)
 public class Propietario extends Usuario {
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "cuenta_bancaria_id")
-    private CuentaBancaria cuentaBancaria;
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumn(name = "cuenta_bancaria_id")
+  private CuentaBancaria cuentaBancaria;
 
-    @Column(name = "hotel_id")
-    private Long idHotel;
-    // solo guardo el id del hotel, no la entidad Hotel 
-    // porque se gestiona en otro microservicio
-    // entonces la consistencia aquí será eventual
+  @Column(name = "hotel_id")
+  private Long idHotel;
+  // solo guardo el id del hotel, no la entidad Hotel
+  // porque se gestiona en otro microservicio
+  // entonces la consistencia aquí será eventual
 }

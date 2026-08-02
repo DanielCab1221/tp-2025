@@ -1,9 +1,8 @@
 package edu.utn.frsf.isi.dan.user.model;
 
-import java.time.LocalDate;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import jakarta.persistence.*;
 
 @Entity
 @Table(name = "usuarios")
@@ -12,13 +11,12 @@ import jakarta.persistence.*;
 @Data
 @NoArgsConstructor
 public abstract class Usuario {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  protected Integer id;
 
-    protected String nombre;
-    protected String email;
-    protected String telefono;
-    protected String dni;
-    
+  protected String nombre;
+  protected String email;
+  protected String telefono;
+  protected String dni;
 }

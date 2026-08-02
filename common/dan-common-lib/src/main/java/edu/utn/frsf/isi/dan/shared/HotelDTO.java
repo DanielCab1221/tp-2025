@@ -1,4 +1,5 @@
 package edu.utn.frsf.isi.dan.shared;
+
 import lombok.*;
 
 @Data
@@ -6,15 +7,14 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class HotelDTO {
-        private Integer id;
-        private String nombre;
-        private String cuit;
-        private String domicilio;
-        private Double latitud;
-        private Double longitud;
-        private String telefono;
-        private String correoContacto;
-        private Integer categoria;
-        private Boolean cerrado;
-
+  private Integer id;
+  private String nombre;
+  private String cuit;
+  private String domicilio;
+  private Double latitud;
+  private Double longitud;
+  private String telefono;
+  private String correoContacto;
+  private Integer categoria;
+  private Boolean cerrado;
 }
