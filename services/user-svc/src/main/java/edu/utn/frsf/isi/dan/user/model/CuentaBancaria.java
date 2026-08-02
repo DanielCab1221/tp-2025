@@ -1,10 +1,9 @@
 package edu.utn.frsf.isi.dan.user.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import jakarta.persistence.*;
 
 @Entity
 @Table(name = "cuentas_bancarias")
@@ -12,21 +11,21 @@ import jakarta.persistence.*;
 @NoArgsConstructor
 public class CuentaBancaria {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Integer id;
 
-    @Column(name = "numero_cuenta")
-    private String numeroCuenta;
-    private String cbu;
-    private String alias;
+  @Column(name = "numero_cuenta")
+  private String numeroCuenta;
 
-    @ManyToOne
-    @JoinColumn(name = "banco_id")
-    private Banco banco;
+  private String cbu;
+  private String alias;
 
-    @OneToOne(mappedBy = "cuentaBancaria")
-    @JsonIgnore
-    private Propietario propietario;
+  @ManyToOne
+  @JoinColumn(name = "banco_id")
+  private Banco banco;
 
+  @OneToOne(mappedBy = "cuentaBancaria")
+  @JsonIgnore
+  private Propietario propietario;
 }
