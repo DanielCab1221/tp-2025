@@ -1,6 +1,7 @@
 package edu.utn.frsf.isi.dan.user.controller;
 
 import edu.utn.frsf.isi.dan.user.dto.BancoDTO;
+import edu.utn.frsf.isi.dan.user.exception.ExceptionInfo;
 import edu.utn.frsf.isi.dan.user.model.Banco;
 import edu.utn.frsf.isi.dan.user.service.BancoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -84,14 +85,26 @@ public class BancoController {
    */
   @Operation(summary = "Eliminar banco")
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> eliminarBanco(@PathVariable Integer id) {
+  public ResponseEntity<?> eliminarBanco(@PathVariable Integer id) {
     try {
       bancoService.eliminarBanco(id);
       return ResponseEntity.noContent().build();
     } catch (IllegalArgumentException e) {
-      return ResponseEntity.notFound().build();
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(
+              new ExceptionInfo(
+                  e.getMessage(),
+                  null,
+                  String.valueOf(System.currentTimeMillis()),
+                  HttpStatus.NOT_FOUND.value()));
     } catch (IllegalStateException e) {
-      return ResponseEntity.status(HttpStatus.CONFLICT).build();
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+          .body(
+              new ExceptionInfo(
+                  e.getMessage(),
+                  null,
+                  String.valueOf(System.currentTimeMillis()),
+                  HttpStatus.CONFLICT.value()));
     }
   }
 }

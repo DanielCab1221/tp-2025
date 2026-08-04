@@ -6,6 +6,7 @@ import edu.utn.frsf.isi.dan.reservas_svc.model.Review;
 import edu.utn.frsf.isi.dan.reservas_svc.service.ReservaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -64,7 +65,7 @@ public class ReservaController {
    */
   @Operation(summary = "Crear reserva")
   @PostMapping
-  public Reserva create(@RequestBody Reserva reserva) {
+  public Reserva create(@Valid @RequestBody Reserva reserva) {
     return reservaService.crear(reserva);
   }
 
@@ -137,7 +138,7 @@ public class ReservaController {
    */
   @Operation(summary = "Registrar pago")
   @PostMapping("/{id}/pagos")
-  public Reserva registrarPago(@PathVariable String id, @RequestBody Pago pago) {
+  public Reserva registrarPago(@PathVariable String id, @Valid @RequestBody Pago pago) {
     return reservaService.registrarPago(id, pago);
   }
 

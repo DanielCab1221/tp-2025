@@ -32,7 +32,8 @@ services:
     ports:
       - "6080:80"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
 
   postgres:
     image: postgres:16
@@ -66,7 +67,8 @@ services:
     ports:
       - "6081:80"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     volumes:
       - ./pgadmin/config/servers/:/pgadmin4/servers/
       - pgadmin_data:/var/lib/pgadmin
@@ -84,6 +86,12 @@ services:
     volumes:
       # Monta el archivo de definiciones en la ruta que lee RabbitMQ al arrancar
       - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      retries: 5
+      start_period: 20s
+
   mongodb:
     image: mongo:7
     container_name: mongodb
@@ -95,6 +103,24 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "--quiet",
+          "--username",
+          "root",
+          "--password",
+          "rootpwd",
+          "--authenticationDatabase",
+          "admin",
+          "--eval",
+          "db.adminCommand('ping')",
+        ]
+      interval: 10s
+      retries: 5
+      start_period: 10s
 
   mongo-express:
     image: mongo-express:latest
@@ -107,7 +133,8 @@ services:
     ports:
       - "6091:8081"
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
 
   user-svc:
     build:
@@ -117,11 +144,17 @@ services:
     ports:
       - "8081:8080"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: default
       DB_USERNAME: usr_app
       DB_PASSWORD: usrapp
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
 
   reservas-svc:
     build:
@@ -131,12 +164,19 @@ services:
     ports:
       - "8082:8080"
     depends_on:
-      - mongodb
-      - rabbitmq
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: default
       DB_USERNAME: root
       DB_PASSWORD: rootpwd
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
 
   gestion-svc:
     build:
@@ -146,12 +186,19 @@ services:
     ports:
       - "8083:8080"
     depends_on:
-      - postgres
-      - rabbitmq
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: default
       DB_USERNAME: appuser
       DB_PASSWORD: apppwd
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
 
 
 

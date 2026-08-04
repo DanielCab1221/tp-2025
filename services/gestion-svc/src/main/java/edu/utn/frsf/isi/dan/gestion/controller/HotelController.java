@@ -5,6 +5,7 @@ import edu.utn.frsf.isi.dan.gestion.model.Hotel;
 import edu.utn.frsf.isi.dan.gestion.service.HotelService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,7 @@ public class HotelController {
    */
   @Operation(summary = "Crear hotel")
   @PostMapping
-  public ResponseEntity<Hotel> create(@RequestBody Hotel hotel) {
+  public ResponseEntity<Hotel> create(@Valid @RequestBody Hotel hotel) {
     return ResponseEntity.ok(hotelService.save(hotel));
   }
 

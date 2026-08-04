@@ -1,6 +1,7 @@
 package edu.utn.frsf.isi.dan.gestion.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 @Entity
@@ -11,7 +12,10 @@ import lombok.*;
 @Builder
 public class TipoHabitacion {
   @Id private Integer id;
+
+  @NotBlank(message = "El nombre es requerido")
   private String nombre;
+
   private String descripcion;
   private Integer capacidad;
 }

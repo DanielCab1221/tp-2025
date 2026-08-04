@@ -4,6 +4,7 @@ import edu.utn.frsf.isi.dan.gestion.model.TipoHabitacion;
 import edu.utn.frsf.isi.dan.gestion.service.TipoHabitacionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +30,7 @@ public class TipoHabitacionController {
    */
   @Operation(summary = "Crear tipo de habitación")
   @PostMapping
-  public ResponseEntity<TipoHabitacion> create(@RequestBody TipoHabitacion tipoHabitacion) {
+  public ResponseEntity<TipoHabitacion> create(@Valid @RequestBody TipoHabitacion tipoHabitacion) {
     return ResponseEntity.ok(tipoHabitacionService.save(tipoHabitacion));
   }
 
@@ -69,7 +70,7 @@ public class TipoHabitacionController {
   @Operation(summary = "Actualizar tipo de habitación")
   @PutMapping("/{id}")
   public ResponseEntity<TipoHabitacion> update(
-      @PathVariable Integer id, @RequestBody TipoHabitacion tipoHabitacion) {
+      @PathVariable Integer id, @Valid @RequestBody TipoHabitacion tipoHabitacion) {
     if (!tipoHabitacionService.findById(id).isPresent()) return ResponseEntity.notFound().build();
     tipoHabitacion.setId(id);
     return ResponseEntity.ok(tipoHabitacionService.save(tipoHabitacion));

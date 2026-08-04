@@ -4,6 +4,7 @@ import edu.utn.frsf.isi.dan.user.dto.HuespedRecord;
 import edu.utn.frsf.isi.dan.user.dto.HuespedUpdateDTO;
 import edu.utn.frsf.isi.dan.user.dto.PropietarioRecord;
 import edu.utn.frsf.isi.dan.user.dto.PropietarioUpdateDTO;
+import edu.utn.frsf.isi.dan.user.exception.ExceptionInfo;
 import edu.utn.frsf.isi.dan.user.model.Usuario;
 import edu.utn.frsf.isi.dan.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -119,12 +120,18 @@ public class UserController {
       summary = "Actualizar huesped",
       description = "Actualiza datos de un huesped existente")
   @PatchMapping("/huesped/{id}")
-  public ResponseEntity<Usuario> actualizarHuesped(
+  public ResponseEntity<?> actualizarHuesped(
       @PathVariable Integer id, @RequestBody @Valid HuespedUpdateDTO updateDTO) {
     try {
       return ResponseEntity.ok(userService.actualizarHuesped(id, updateDTO));
     } catch (IllegalArgumentException e) {
-      return ResponseEntity.notFound().build();
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(
+              new ExceptionInfo(
+                  e.getMessage(),
+                  null,
+                  String.valueOf(System.currentTimeMillis()),
+                  HttpStatus.NOT_FOUND.value()));
     }
   }
 
@@ -136,12 +143,18 @@ public class UserController {
    */
   @Operation(summary = "Eliminar huesped", description = "Elimina un huesped por su ID")
   @DeleteMapping("/huesped/{id}")
-  public ResponseEntity<Void> eliminarHuesped(@PathVariable Integer id) {
+  public ResponseEntity<?> eliminarHuesped(@PathVariable Integer id) {
     try {
       userService.eliminarHuesped(id);
       return ResponseEntity.noContent().build();
     } catch (IllegalArgumentException e) {
-      return ResponseEntity.notFound().build();
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(
+              new ExceptionInfo(
+                  e.getMessage(),
+                  null,
+                  String.valueOf(System.currentTimeMillis()),
+                  HttpStatus.NOT_FOUND.value()));
     }
   }
 
@@ -156,12 +169,18 @@ public class UserController {
       summary = "Actualizar propietario",
       description = "Actualiza datos de un propietario existente")
   @PatchMapping("/propietario/{id}")
-  public ResponseEntity<Usuario> actualizarPropietario(
+  public ResponseEntity<?> actualizarPropietario(
       @PathVariable Integer id, @RequestBody @Valid PropietarioUpdateDTO updateDTO) {
     try {
       return ResponseEntity.ok(userService.actualizarPropietario(id, updateDTO));
     } catch (IllegalArgumentException e) {
-      return ResponseEntity.notFound().build();
+      return ResponseEntity.status(HttpStatus.NOT_FOUND)
+          .body(
+              new ExceptionInfo(
+                  e.getMessage(),
+                  null,
+                  String.valueOf(System.currentTimeMillis()),
+                  HttpStatus.NOT_FOUND.value()));
     }
   }
 }
