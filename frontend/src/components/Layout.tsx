@@ -1,4 +1,6 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { ErrorBoundary } from "./ErrorBoundary";
+import { EventBusPanel } from "./EventBusPanel";
 
 interface NavLinkItem {
   to: string;
@@ -40,6 +42,8 @@ const sections: NavSection[] = [
 ];
 
 export function Layout() {
+  const location = useLocation();
+
   return (
     <div className="flex min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100">
       <aside className="w-60 shrink-0 border-r border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
@@ -78,9 +82,12 @@ export function Layout() {
           ))}
         </nav>
       </aside>
-      <main className="max-w-5xl flex-1 overflow-x-hidden p-6">
-        <Outlet />
+      <main className="max-w-5xl flex-1 overflow-x-hidden p-6 pb-24">
+        <ErrorBoundary key={location.pathname}>
+          <Outlet />
+        </ErrorBoundary>
       </main>
+      <EventBusPanel />
     </div>
   );
 }

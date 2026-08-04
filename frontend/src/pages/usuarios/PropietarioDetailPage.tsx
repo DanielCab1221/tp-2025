@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { userSvc } from "../../api/userSvc";
+import { useToast } from "../../lib/toast";
 import type { Propietario } from "../../types/userSvc";
 import {
   btnPrimary,
@@ -16,6 +17,7 @@ export function PropietarioDetailPage() {
   const propietarioId = Number(id);
   const location = useLocation();
   const queryClient = useQueryClient();
+  const toast = useToast();
 
   // Igual que con Huesped: no existe GET /users/{id}, así que el detalle
   // llega por navegación desde el listado.
@@ -42,6 +44,7 @@ export function PropietarioDetailPage() {
     onSuccess: (updated) => {
       setPropietario(updated);
       queryClient.invalidateQueries({ queryKey: ["propietarios"] });
+      toast.success("Propietario actualizado");
     },
     onError: setError,
   });

@@ -109,13 +109,21 @@ test("no se puede borrar un banco referenciado por una tarjeta (409)", async ({
     },
   });
 
-  page.on("dialog", (dialog) => dialog.accept());
   await page.goto("/usuarios/bancos");
   const fila = page.getByRole("row", { name: new RegExp(bancoNombre) });
   await expect(fila).toBeVisible();
   await fila.getByRole("button", { name: "Borrar" }).click();
 
-  await expect(page.getByText(/Conflicto.*409/)).toBeVisible();
+  // El botón de la fila abre el modal de confirmación propio del dashboard
+  // (ya no es un confirm() nativo del navegador); hay que confirmarlo ahí.
+  const confirmDialog = page.getByRole("dialog", { name: "Confirmar acción" });
+  await confirmDialog.getByRole("button", { name: "Borrar" }).click();
+
+  await expect(
+    page.getByText(
+      "No se puede eliminar el banco porque esta referenciado por una tarjeta o cuenta bancaria",
+    ),
+  ).toBeVisible();
   // Sigue en la lista: el borrado no se aplicó.
   await expect(fila).toBeVisible();
 });

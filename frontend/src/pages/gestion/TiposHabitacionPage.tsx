@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { gestionSvc } from "../../api/gestionSvc";
+import { useConfirm } from "../../lib/confirm";
+import { useToast } from "../../lib/toast";
 import type { TipoHabitacion } from "../../types/gestionSvc";
 import { DataTable } from "../../components/DataTable";
 import {
@@ -17,6 +19,8 @@ import {
 
 export function TiposHabitacionPage() {
   const queryClient = useQueryClient();
+  const toast = useToast();
+  const confirm = useConfirm();
   const query = useQuery({
     queryKey: ["tipos-habitacion"],
     queryFn: gestionSvc.listarTiposHabitacion,
@@ -44,6 +48,7 @@ export function TiposHabitacionPage() {
     onSuccess: () => {
       invalidate();
       setEditing(null);
+      toast.success("Tipo de habitación creado");
     },
     onError: setError,
   });
@@ -57,12 +62,16 @@ export function TiposHabitacionPage() {
     onSuccess: () => {
       invalidate();
       setEditing(null);
+      toast.success("Tipo de habitación actualizado");
     },
     onError: setError,
   });
   const eliminar = useMutation({
     mutationFn: (id: number) => gestionSvc.eliminarTipoHabitacion(id),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      toast.success("Tipo de habitación eliminado");
+    },
     onError: setError,
   });
 
@@ -113,10 +122,11 @@ export function TiposHabitacionPage() {
                   <button
                     className={btnDanger}
                     disabled={eliminar.isPending}
-                    onClick={() => {
+                    onClick={async () => {
                       if (
-                        confirm(
+                        await confirm(
                           `¿Borrar el tipo "${t.nombre}"? Fallará si hay habitaciones/tarifas que lo usan.`,
+                          { confirmLabel: "Borrar" },
                         )
                       )
                         eliminar.mutate(t.id);

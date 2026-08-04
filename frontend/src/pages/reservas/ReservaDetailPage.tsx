@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { reservasSvc } from "../../api/reservasSvc";
+import { useToast } from "../../lib/toast";
 import {
   btnPrimary,
   btnSecondary,
@@ -18,6 +19,7 @@ export function ReservaDetailPage() {
   const { id } = useParams<{ id: string }>();
   const reservaId = id as string;
   const queryClient = useQueryClient();
+  const toast = useToast();
   const query = useQuery({
     queryKey: ["reserva", reservaId],
     queryFn: () => reservasSvc.obtenerReserva(reservaId),
@@ -29,17 +31,26 @@ export function ReservaDetailPage() {
 
   const cancelar = useMutation({
     mutationFn: () => reservasSvc.cancelar(reservaId),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      toast.success("Reserva cancelada");
+    },
     onError: setActionError,
   });
   const checkin = useMutation({
     mutationFn: () => reservasSvc.checkin(reservaId),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      toast.success("Check-in registrado");
+    },
     onError: setActionError,
   });
   const checkout = useMutation({
     mutationFn: () => reservasSvc.checkout(reservaId),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      toast.success("Check-out registrado");
+    },
     onError: setActionError,
   });
 
@@ -70,6 +81,7 @@ export function ReservaDetailPage() {
         moneda: "ARS",
         status: "APROBADO",
       });
+      toast.success("Pago registrado");
     },
     onError: setPayError,
   });
@@ -88,7 +100,10 @@ export function ReservaDetailPage() {
         rating: Number(clientReviewForm.rating),
         comment: clientReviewForm.comment,
       }),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      toast.success("Review del huésped publicada");
+    },
     onError: setActionError,
   });
   const reviewHotel = useMutation({
@@ -97,7 +112,10 @@ export function ReservaDetailPage() {
         rating: Number(hostReviewForm.rating),
         comment: hostReviewForm.comment,
       }),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      toast.success("Review del hotel publicada");
+    },
     onError: setActionError,
   });
 

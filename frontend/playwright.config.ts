@@ -5,6 +5,11 @@ export default defineConfig({
   timeout: 30_000,
   expect: { timeout: 10_000 },
   fullyParallel: false,
+  // Los specs pegan contra el backend real compartido (no hay mocks ni DB
+  // efímera por test): correr los archivos en paralelo hace que se pisen
+  // entre sí bajo carga y generen fallos intermitentes por timing. Un solo
+  // worker los serializa por completo.
+  workers: 1,
   retries: 0,
   reporter: "line",
   use: {

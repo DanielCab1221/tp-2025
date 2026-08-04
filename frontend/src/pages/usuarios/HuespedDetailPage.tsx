@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { userSvc } from "../../api/userSvc";
+import { useConfirm } from "../../lib/confirm";
+import { useToast } from "../../lib/toast";
 import type { Huesped } from "../../types/userSvc";
 import { DataTable } from "../../components/DataTable";
 import {
@@ -23,6 +25,8 @@ export function HuespedDetailPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
+  const toast = useToast();
+  const confirm = useConfirm();
 
   // No existe GET /users/{id} en user-svc: el detalle se recibe por navegación
   // desde el listado (ver HuespedesPage) y se refresca localmente con lo que
@@ -44,6 +48,7 @@ export function HuespedDetailPage() {
     onSuccess: (updated) => {
       setHuesped(updated);
       queryClient.invalidateQueries({ queryKey: ["huespedes"] });
+      toast.success("Huésped actualizado");
     },
     onError: setEditError,
   });
@@ -52,6 +57,7 @@ export function HuespedDetailPage() {
     mutationFn: () => userSvc.eliminarHuesped(huespedId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["huespedes"] });
+      toast.success("Huésped eliminado");
       navigate("/usuarios/huespedes");
     },
   });
@@ -67,12 +73,18 @@ export function HuespedDetailPage() {
 
   const eliminarTarjeta = useMutation({
     mutationFn: (tarjetaId: number) => userSvc.eliminarTarjeta(tarjetaId),
-    onSuccess: invalidateTarjetas,
+    onSuccess: () => {
+      invalidateTarjetas();
+      toast.success("Tarjeta eliminada");
+    },
   });
   const cambiarPrincipal = useMutation({
     mutationFn: (tarjetaId: number) =>
       userSvc.cambiarTarjetaPrincipal(huespedId, tarjetaId),
-    onSuccess: invalidateTarjetas,
+    onSuccess: () => {
+      invalidateTarjetas();
+      toast.success("Tarjeta marcada como principal");
+    },
   });
 
   const [addingTarjeta, setAddingTarjeta] = useState(false);
@@ -99,6 +111,7 @@ export function HuespedDetailPage() {
     onSuccess: () => {
       invalidateTarjetas();
       setAddingTarjeta(false);
+      toast.success("Tarjeta agregada");
     },
     onError: setTarjetaError,
   });
@@ -131,9 +144,12 @@ export function HuespedDetailPage() {
           <button
             className={btnDanger}
             disabled={eliminar.isPending}
-            onClick={() => {
+            onClick={async () => {
               if (
-                confirm("¿Borrar este huésped? Se borran también sus tarjetas.")
+                await confirm(
+                  "¿Borrar este huésped? Se borran también sus tarjetas.",
+                  { confirmLabel: "Borrar" },
+                )
               )
                 eliminar.mutate();
             }}

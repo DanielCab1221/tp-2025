@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { reservasSvc } from "../../api/reservasSvc";
+import { useToast } from "../../lib/toast";
 import { DataTable } from "../../components/DataTable";
 import {
   btnPrimary,
@@ -14,6 +15,7 @@ import {
 
 export function BloqueosPage() {
   const navigate = useNavigate();
+  const toast = useToast();
   const habitacionesQuery = useQuery({
     queryKey: ["habitaciones-reservas"],
     queryFn: reservasSvc.listarHabitaciones,
@@ -28,7 +30,10 @@ export function BloqueosPage() {
   const crear = useMutation({
     mutationFn: () =>
       reservasSvc.crearBloqueo(form.idHabitacion, form.checkIn, form.checkOut),
-    onSuccess: (reserva) => navigate(`/reservas/${reserva._id}`),
+    onSuccess: (reserva) => {
+      toast.success("Bloqueo creado");
+      navigate(`/reservas/${reserva._id}`);
+    },
     onError: setError,
   });
 

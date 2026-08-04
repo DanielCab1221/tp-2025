@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { userSvc } from "../../api/userSvc";
+import { useConfirm } from "../../lib/confirm";
+import { useToast } from "../../lib/toast";
 import type { Banco } from "../../types/userSvc";
 import { DataTable } from "../../components/DataTable";
 import {
@@ -17,6 +19,8 @@ import {
 
 export function BancosPage() {
   const queryClient = useQueryClient();
+  const toast = useToast();
+  const confirm = useConfirm();
   const bancosQuery = useQuery({
     queryKey: ["bancos"],
     queryFn: userSvc.listarBancos,
@@ -33,6 +37,7 @@ export function BancosPage() {
     onSuccess: () => {
       invalidate();
       setEditing(null);
+      toast.success("Banco creado");
     },
     onError: setError,
   });
@@ -41,12 +46,16 @@ export function BancosPage() {
     onSuccess: () => {
       invalidate();
       setEditing(null);
+      toast.success("Banco actualizado");
     },
     onError: setError,
   });
   const eliminar = useMutation({
     mutationFn: (id: number) => userSvc.eliminarBanco(id),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      toast.success("Banco eliminado");
+    },
     onError: setError,
   });
 
@@ -94,8 +103,12 @@ export function BancosPage() {
                   <button
                     className={btnDanger}
                     disabled={eliminar.isPending}
-                    onClick={() => {
-                      if (confirm(`¿Borrar el banco "${b.nombre}"?`))
+                    onClick={async () => {
+                      if (
+                        await confirm(`¿Borrar el banco "${b.nombre}"?`, {
+                          confirmLabel: "Borrar",
+                        })
+                      )
                         eliminar.mutate(b.id);
                     }}
                   >

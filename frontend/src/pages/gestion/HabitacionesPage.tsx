@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { gestionSvc } from "../../api/gestionSvc";
+import { useToast } from "../../lib/toast";
 import type { BuscarHabitacionesParams } from "../../types/gestionSvc";
 import { DataTable } from "../../components/DataTable";
 import {
@@ -18,6 +19,7 @@ import {
 export function HabitacionesPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [filtros, setFiltros] = useState<BuscarHabitacionesParams>({});
   const query = useQuery({
     queryKey: ["habitaciones", filtros],
@@ -54,6 +56,7 @@ export function HabitacionesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["habitaciones"] });
       setCreating(false);
+      toast.success("Habitación creada");
     },
     onError: setError,
   });

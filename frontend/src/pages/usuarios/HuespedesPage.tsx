@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { userSvc } from "../../api/userSvc";
+import { useToast } from "../../lib/toast";
 import { isHuesped } from "../../types/userSvc";
 import { DataTable } from "../../components/DataTable";
 import {
@@ -20,6 +21,7 @@ const PAGE_SIZE = 10;
 export function HuespedesPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [buscarPor, setBuscarPor] = useState<"nombre" | "dni">("nombre");
   const [texto, setTexto] = useState("");
   const [page, setPage] = useState(0);
@@ -64,6 +66,7 @@ export function HuespedesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["huespedes"] });
       setCreating(false);
+      toast.success("Huésped creado");
     },
     onError: setError,
   });

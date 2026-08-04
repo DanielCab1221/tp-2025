@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { gestionSvc } from "../../api/gestionSvc";
+import { useConfirm } from "../../lib/confirm";
+import { useToast } from "../../lib/toast";
 import { AMENITIES, type Amenity } from "../../types/gestionSvc";
 import {
   btnDanger,
@@ -18,6 +20,8 @@ export function HotelDetailPage() {
   const { id } = useParams<{ id: string }>();
   const hotelId = Number(id);
   const queryClient = useQueryClient();
+  const toast = useToast();
+  const confirm = useConfirm();
   const query = useQuery({
     queryKey: ["hotel", hotelId],
     queryFn: () => gestionSvc.obtenerHotel(hotelId),
@@ -50,13 +54,19 @@ export function HotelDetailPage() {
         telefono: form.telefono || null,
         correoContacto: form.correoContacto || null,
       }),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      toast.success("Hotel actualizado");
+    },
     onError: setError,
   });
 
   const cerrar = useMutation({
     mutationFn: () => gestionSvc.cerrarHotel(hotelId),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      toast.success("Hotel cerrado");
+    },
   });
 
   const [selectedAmenity, setSelectedAmenity] = useState<Amenity | "">("");
@@ -66,12 +76,16 @@ export function HotelDetailPage() {
     onSuccess: () => {
       invalidate();
       setSelectedAmenity("");
+      toast.success("Amenity agregada");
     },
   });
   const quitarAmenity = useMutation({
     mutationFn: (amenity: Amenity) =>
       gestionSvc.quitarAmenity(hotelId, amenity),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      toast.success("Amenity quitada");
+    },
   });
 
   if (query.isLoading) return <Spinner />;
@@ -94,10 +108,11 @@ export function HotelDetailPage() {
             <button
               className={btnDanger}
               disabled={cerrar.isPending}
-              onClick={() => {
+              onClick={async () => {
                 if (
-                  confirm(
+                  await confirm(
                     "Cerrar el hotel es irreversible: todas sus habitaciones pasan a no disponibles. ¿Continuar?",
+                    { title: "Cerrar hotel", confirmLabel: "Cerrar hotel" },
                   )
                 )
                   cerrar.mutate();

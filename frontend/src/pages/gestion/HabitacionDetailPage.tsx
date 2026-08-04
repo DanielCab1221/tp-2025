@@ -2,7 +2,9 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { gestionSvc } from "../../api/gestionSvc";
+import { useConfirm } from "../../lib/confirm";
 import { ApiError } from "../../lib/http";
+import { useToast } from "../../lib/toast";
 import {
   btnDanger,
   btnPrimary,
@@ -18,6 +20,8 @@ export function HabitacionDetailPage() {
   const habitacionId = Number(id);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
+  const confirm = useConfirm();
 
   const query = useQuery({
     queryKey: ["habitacion", habitacionId],
@@ -52,8 +56,10 @@ export function HabitacionDetailPage() {
         tipoHabitacion: { id: query.data.tipoHabitacion.id },
       });
     },
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["habitacion", habitacionId] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["habitacion", habitacionId] });
+      toast.success("Habitación actualizada");
+    },
     onError: setError,
   });
 
@@ -61,6 +67,7 @@ export function HabitacionDetailPage() {
     mutationFn: () => gestionSvc.eliminarHabitacion(habitacionId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["habitaciones"] });
+      toast.success("Habitación eliminada");
       navigate("/gestion/habitaciones");
     },
   });
@@ -80,8 +87,13 @@ export function HabitacionDetailPage() {
           <button
             className={btnDanger}
             disabled={eliminar.isPending}
-            onClick={() => {
-              if (confirm("¿Borrar esta habitación?")) eliminar.mutate();
+            onClick={async () => {
+              if (
+                await confirm("¿Borrar esta habitación?", {
+                  confirmLabel: "Borrar",
+                })
+              )
+                eliminar.mutate();
             }}
           >
             Borrar

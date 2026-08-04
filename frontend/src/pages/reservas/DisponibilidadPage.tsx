@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { reservasSvc } from "../../api/reservasSvc";
+import { useToast } from "../../lib/toast";
 import { AMENITIES, type Amenity } from "../../types/gestionSvc";
 import type {
   BuscarDisponibilidadParams,
@@ -264,6 +265,7 @@ function ReservarModal({
     email: "",
   });
   const [error, setError] = useState<unknown>(null);
+  const toast = useToast();
 
   const crear = useMutation({
     mutationFn: () =>
@@ -273,7 +275,10 @@ function ReservarModal({
         checkOut: `${checkOut}T00:00:00Z`,
         huesped: form,
       }),
-    onSuccess: (reserva) => onCreated(reserva._id),
+    onSuccess: (reserva) => {
+      toast.success("Reserva creada");
+      onCreated(reserva._id);
+    },
     onError: setError,
   });
 

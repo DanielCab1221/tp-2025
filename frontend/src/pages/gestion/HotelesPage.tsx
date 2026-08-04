@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { gestionSvc } from "../../api/gestionSvc";
+import { useToast } from "../../lib/toast";
 import {
   AMENITIES,
   type Amenity,
@@ -22,6 +23,7 @@ import {
 export function HotelesPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [filtros, setFiltros] = useState<BuscarHotelesParams>({});
   const query = useQuery({
     queryKey: ["hoteles", filtros],
@@ -57,6 +59,7 @@ export function HotelesPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["hoteles"] });
       setCreating(false);
+      toast.success("Hotel creado");
     },
     onError: setError,
   });

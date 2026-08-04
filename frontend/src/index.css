@@ -2,6 +2,10 @@
 
 :root {
   color-scheme: light dark;
+  /* Deja aire debajo del contenido al hacer scroll-into-view, para que el
+     botón flotante "Bus de eventos" (fixed, abajo a la derecha) nunca quede
+     tapando la última fila de una tabla larga. */
+  scroll-padding-bottom: 6rem;
 }
 
 body {

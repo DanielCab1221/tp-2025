@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { gestionSvc } from "../../api/gestionSvc";
+import { useConfirm } from "../../lib/confirm";
+import { useToast } from "../../lib/toast";
 import { DataTable } from "../../components/DataTable";
 import {
   btnDanger,
@@ -16,6 +18,8 @@ import {
 
 export function TarifasPage() {
   const queryClient = useQueryClient();
+  const toast = useToast();
+  const confirm = useConfirm();
   const query = useQuery({
     queryKey: ["tarifas"],
     queryFn: gestionSvc.listarTarifas,
@@ -30,7 +34,10 @@ export function TarifasPage() {
 
   const eliminar = useMutation({
     mutationFn: (id: number) => gestionSvc.eliminarTarifa(id),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      toast.success("Tarifa eliminada");
+    },
   });
 
   const [creating, setCreating] = useState(false);
@@ -53,6 +60,7 @@ export function TarifasPage() {
     onSuccess: () => {
       invalidate();
       setCreating(false);
+      toast.success("Tarifa creada");
     },
     onError: setError,
   });
@@ -98,8 +106,13 @@ export function TarifasPage() {
                 <button
                   className={btnDanger}
                   disabled={eliminar.isPending}
-                  onClick={() => {
-                    if (confirm("¿Borrar esta tarifa?")) eliminar.mutate(t.id);
+                  onClick={async () => {
+                    if (
+                      await confirm("¿Borrar esta tarifa?", {
+                        confirmLabel: "Borrar",
+                      })
+                    )
+                      eliminar.mutate(t.id);
                   }}
                 >
                   Borrar
