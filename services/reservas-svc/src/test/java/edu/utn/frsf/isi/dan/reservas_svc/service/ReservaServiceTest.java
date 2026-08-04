@@ -277,9 +277,10 @@ public class ReservaServiceTest {
   }
 
   @Test
-  public void testRegistrarPago_AdeudadaCompleta100Porciento_PasaAFinalizada() {
+  public void testRegistrarPago_AdeudadaCompleta100PorcientoConHostReview_PasaAFinalizada() {
     List<Pago> pagosPrevios = new ArrayList<>(List.of(pagoDe(800.0)));
     Reserva reserva = reservaConEstado(EstadoReserva.ADEUDADA, 1000.0, pagosPrevios);
+    reserva.setHostReview(Review.builder().rating(4).comment("Buen huesped").build());
     when(reservaRepository.findById(RESERVA_ID)).thenReturn(Optional.of(reserva));
     Pago pago = pagoDe(200.0);
 
@@ -290,9 +291,22 @@ public class ReservaServiceTest {
   }
 
   @Test
+  public void testRegistrarPago_AdeudadaCompleta100PorcientoSinHostReview_QuedaAdeudada() {
+    List<Pago> pagosPrevios = new ArrayList<>(List.of(pagoDe(800.0)));
+    Reserva reserva = reservaConEstado(EstadoReserva.ADEUDADA, 1000.0, pagosPrevios);
+    when(reservaRepository.findById(RESERVA_ID)).thenReturn(Optional.of(reserva));
+    Pago pago = pagoDe(200.0);
+
+    Reserva resultado = reservaService.registrarPago(RESERVA_ID, pago);
+
+    assertEquals(EstadoReserva.ADEUDADA, resultado.getEstadoReserva());
+  }
+
+  @Test
   public void testRegistrarPago_AdeudadaNoCompleta100Porciento_QuedaAdeudada() {
     List<Pago> pagosPrevios = new ArrayList<>(List.of(pagoDe(800.0)));
     Reserva reserva = reservaConEstado(EstadoReserva.ADEUDADA, 1000.0, pagosPrevios);
+    reserva.setHostReview(Review.builder().rating(4).comment("Buen huesped").build());
     when(reservaRepository.findById(RESERVA_ID)).thenReturn(Optional.of(reserva));
     Pago pago = pagoDe(100.0);
 
@@ -369,6 +383,48 @@ public class ReservaServiceTest {
   }
 
   // ---------------------------------------------------------------------
+  // liberarReservasVencidas()
+  // ---------------------------------------------------------------------
+
+  @Test
+  public void testLiberarReservasVencidas_ReservadaSinPago_Cancela() {
+    Reserva reserva = reservaConEstado(EstadoReserva.RESERVADA, 1000.0, new ArrayList<>());
+    Instant limite = Instant.parse("2026-01-01T00:00:00Z");
+    when(reservaRepository.findByEstadoReservaAndCreatedAtBefore(EstadoReserva.RESERVADA, limite))
+        .thenReturn(List.of(reserva));
+
+    List<Reserva> liberadas = reservaService.liberarReservasVencidas(limite);
+
+    assertEquals(1, liberadas.size());
+    assertEquals(EstadoReserva.CANCELADA, liberadas.get(0).getEstadoReserva());
+  }
+
+  @Test
+  public void testLiberarReservasVencidas_ReservadaConPago_NoLaCancela() {
+    List<Pago> pagos = new ArrayList<>(List.of(pagoDe(100.0)));
+    Reserva reserva = reservaConEstado(EstadoReserva.RESERVADA, 1000.0, pagos);
+    Instant limite = Instant.parse("2026-01-01T00:00:00Z");
+    when(reservaRepository.findByEstadoReservaAndCreatedAtBefore(EstadoReserva.RESERVADA, limite))
+        .thenReturn(List.of(reserva));
+
+    List<Reserva> liberadas = reservaService.liberarReservasVencidas(limite);
+
+    assertEquals(0, liberadas.size());
+    assertEquals(EstadoReserva.RESERVADA, reserva.getEstadoReserva());
+  }
+
+  @Test
+  public void testLiberarReservasVencidas_SinVencidas_DevuelveListaVacia() {
+    Instant limite = Instant.parse("2026-01-01T00:00:00Z");
+    when(reservaRepository.findByEstadoReservaAndCreatedAtBefore(EstadoReserva.RESERVADA, limite))
+        .thenReturn(List.of());
+
+    List<Reserva> liberadas = reservaService.liberarReservasVencidas(limite);
+
+    assertEquals(0, liberadas.size());
+  }
+
+  // ---------------------------------------------------------------------
   // registrarCheckIn()
   // ---------------------------------------------------------------------
 
@@ -412,20 +468,21 @@ public class ReservaServiceTest {
   }
 
   @Test
-  public void testRegistrarCheckOut_SinClientReview_LanzaIllegalArgumentException() {
-    Reserva reserva = reservaConEstado(EstadoReserva.EFECTUADA, 1000.0, new ArrayList<>());
-    reserva.setClientReview(null);
+  public void testRegistrarCheckOut_SinHostReviewPagoCompleto_PasaAAdeudada() {
+    List<Pago> pagos = new ArrayList<>(List.of(pagoDe(1000.0)));
+    Reserva reserva = reservaConEstado(EstadoReserva.EFECTUADA, 1000.0, pagos);
     when(reservaRepository.findById(RESERVA_ID)).thenReturn(Optional.of(reserva));
 
-    assertThrows(
-        IllegalArgumentException.class, () -> reservaService.registrarCheckOut(RESERVA_ID));
+    Reserva resultado = reservaService.registrarCheckOut(RESERVA_ID);
+
+    assertEquals(EstadoReserva.ADEUDADA, resultado.getEstadoReserva());
   }
 
   @Test
-  public void testRegistrarCheckOut_ConReviewYPagoCompleto_PasaAFinalizada() {
+  public void testRegistrarCheckOut_ConHostReviewYPagoCompleto_PasaAFinalizada() {
     List<Pago> pagos = new ArrayList<>(List.of(pagoDe(1000.0)));
     Reserva reserva = reservaConEstado(EstadoReserva.EFECTUADA, 1000.0, pagos);
-    reserva.setClientReview(Review.builder().rating(5).comment("Muy bueno").build());
+    reserva.setHostReview(Review.builder().rating(5).comment("Muy buen huesped").build());
     when(reservaRepository.findById(RESERVA_ID)).thenReturn(Optional.of(reserva));
 
     Reserva resultado = reservaService.registrarCheckOut(RESERVA_ID);
@@ -434,10 +491,10 @@ public class ReservaServiceTest {
   }
 
   @Test
-  public void testRegistrarCheckOut_ConReviewYPagoIncompleto_PasaAAdeudada() {
+  public void testRegistrarCheckOut_ConHostReviewYPagoIncompleto_PasaAAdeudada() {
     List<Pago> pagos = new ArrayList<>(List.of(pagoDe(500.0)));
     Reserva reserva = reservaConEstado(EstadoReserva.EFECTUADA, 1000.0, pagos);
-    reserva.setClientReview(Review.builder().rating(4).comment("Bueno").build());
+    reserva.setHostReview(Review.builder().rating(4).comment("Buen huesped").build());
     when(reservaRepository.findById(RESERVA_ID)).thenReturn(Optional.of(reserva));
 
     Reserva resultado = reservaService.registrarCheckOut(RESERVA_ID);
@@ -526,6 +583,30 @@ public class ReservaServiceTest {
     Reserva resultado = reservaService.registrarReviewHotel(RESERVA_ID, review);
 
     assertEquals(review, resultado.getHostReview());
+  }
+
+  @Test
+  public void testRegistrarReviewHotel_AdeudadaConPagoCompleto_PasaAFinalizada() {
+    List<Pago> pagos = new ArrayList<>(List.of(pagoDe(1000.0)));
+    Reserva reserva = reservaConEstado(EstadoReserva.ADEUDADA, 1000.0, pagos);
+    when(reservaRepository.findById(RESERVA_ID)).thenReturn(Optional.of(reserva));
+    Review review = Review.builder().rating(4).comment("Buen huesped").build();
+
+    Reserva resultado = reservaService.registrarReviewHotel(RESERVA_ID, review);
+
+    assertEquals(EstadoReserva.FINALIZADA, resultado.getEstadoReserva());
+  }
+
+  @Test
+  public void testRegistrarReviewHotel_AdeudadaConPagoIncompleto_QuedaAdeudada() {
+    List<Pago> pagos = new ArrayList<>(List.of(pagoDe(500.0)));
+    Reserva reserva = reservaConEstado(EstadoReserva.ADEUDADA, 1000.0, pagos);
+    when(reservaRepository.findById(RESERVA_ID)).thenReturn(Optional.of(reserva));
+    Review review = Review.builder().rating(4).comment("Buen huesped").build();
+
+    Reserva resultado = reservaService.registrarReviewHotel(RESERVA_ID, review);
+
+    assertEquals(EstadoReserva.ADEUDADA, resultado.getEstadoReserva());
   }
 
   @Test

@@ -168,7 +168,7 @@ test("la tarjeta principal no se puede borrar desde la UI", async ({
   await expect(borrarTarjeta).toBeDisabled();
 });
 
-test("checkout sin review no cambia el estado y muestra el error del backend", async ({
+test("checkout sin review del hotel y con pago completo pasa a ADEUDADA", async ({
   page,
   request,
 }) => {
@@ -178,12 +178,13 @@ test("checkout sin review no cambia el estado y muestra el error del backend", a
     suffix,
   );
 
-  // Pagar el 50% (confirma sola) y hacer checkin, todo por API.
+  // Completar el 100% del pago (confirma y luego alcanza el pago completo) y
+  // hacer checkin, todo por API.
   await request.post(`${RESERVAS_SVC}/reservas/${reservaId}/pagos`, {
     data: {
       method: "TARJETA",
       transactionId: `setup-${suffix}`,
-      amount: { precio: precioTotal / 2, moneda: "ARS" },
+      amount: { precio: precioTotal, moneda: "ARS" },
       status: "APROBADO",
     },
   });
@@ -192,15 +193,10 @@ test("checkout sin review no cambia el estado y muestra el error del backend", a
   await page.goto(`/reservas/${reservaId}`);
   await expect(page.getByText("EFECTUADA")).toBeVisible();
 
-  // Sin cargar el review del huésped, el checkout debe rechazarse.
+  // El pago está completo, pero el dueño todavía no dejó su review: aunque el
+  // check-out se puede efectuar, la reserva queda ADEUDADA hasta que lo haga.
   await page.getByRole("button", { name: "Check-out" }).click();
-  await expect(
-    page.getByText(
-      "No se puede finalizar la reserva sin que el huesped deje un review",
-    ),
-  ).toBeVisible();
-  await expect(page.getByText("EFECTUADA")).toBeVisible();
-  await expect(page.getByText("ADEUDADA")).not.toBeVisible();
+  await expect(page.getByText("ADEUDADA")).toBeVisible();
 });
 
 test("no se puede cancelar una reserva que ya tiene pagos registrados", async ({

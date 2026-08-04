@@ -130,6 +130,25 @@ public class ReservaService {
     return reservaRepository.save(bloqueo);
   }
 
+  /**
+   * Cancela las reservas RESERVADA (sin seña) creadas antes de {@code limite}, liberando la
+   * habitacion para otros huespedes. No toca reservas con algun pago registrado: por debajo del
+   * 50% no llegaron a CONFIRMADA, pero cancelarlas automaticamente implicaria un reembolso que
+   * esta fuera del alcance de esta limpieza.
+   */
+  public List<Reserva> liberarReservasVencidas(Instant limite) {
+    List<Reserva> vencidas =
+        reservaRepository.findByEstadoReservaAndCreatedAtBefore(EstadoReserva.RESERVADA, limite);
+    List<Reserva> liberadas = new ArrayList<>();
+    for (Reserva reserva : vencidas) {
+      if (reserva.getPago() == null || reserva.getPago().isEmpty()) {
+        reserva.setEstadoReserva(EstadoReserva.CANCELADA);
+        liberadas.add(reservaRepository.save(reserva));
+      }
+    }
+    return liberadas;
+  }
+
   public Reserva cancelar(String id) {
     Reserva reserva = obtenerOFallar(id);
     if (!CANCELABLES.contains(reserva.getEstadoReserva())) {
@@ -163,12 +182,8 @@ public class ReservaService {
               + reserva.getEstadoReserva()
               + ")");
     }
-    if (reserva.getClientReview() == null) {
-      throw new IllegalArgumentException(
-          "No se puede finalizar la reserva sin que el huesped deje un review");
-    }
     reserva.setEstadoReserva(
-        pagoCompleto(reserva) ? EstadoReserva.FINALIZADA : EstadoReserva.ADEUDADA);
+        finalizacionCompleta(reserva) ? EstadoReserva.FINALIZADA : EstadoReserva.ADEUDADA);
     return reservaRepository.save(reserva);
   }
 
@@ -194,7 +209,8 @@ public class ReservaService {
     if (reserva.getEstadoReserva() == EstadoReserva.RESERVADA
         && alcanzaMinimoParaConfirmar(reserva)) {
       reserva.setEstadoReserva(EstadoReserva.CONFIRMADA);
-    } else if (reserva.getEstadoReserva() == EstadoReserva.ADEUDADA && pagoCompleto(reserva)) {
+    } else if (reserva.getEstadoReserva() == EstadoReserva.ADEUDADA
+        && finalizacionCompleta(reserva)) {
       reserva.setEstadoReserva(EstadoReserva.FINALIZADA);
     }
     return reservaRepository.save(reserva);
@@ -212,6 +228,10 @@ public class ReservaService {
 
   private boolean pagoCompleto(Reserva reserva) {
     return reserva.getPrecioTotal() != null && totalPagado(reserva) >= reserva.getPrecioTotal();
+  }
+
+  private boolean finalizacionCompleta(Reserva reserva) {
+    return pagoCompleto(reserva) && reserva.getHostReview() != null;
   }
 
   public Reserva registrarReviewCliente(String id, Review review) {
@@ -237,6 +257,9 @@ public class ReservaService {
     }
     review.setCreatedAt(Instant.now().toString());
     reserva.setHostReview(review);
+    if (reserva.getEstadoReserva() == EstadoReserva.ADEUDADA && finalizacionCompleta(reserva)) {
+      reserva.setEstadoReserva(EstadoReserva.FINALIZADA);
+    }
     return reservaRepository.save(reserva);
   }
 

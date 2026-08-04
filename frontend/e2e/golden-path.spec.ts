@@ -4,9 +4,9 @@ import { test, expect } from "@playwright/test";
 // (requiere el stack de infra/docker-compose.yml arriba): crea un hotel,
 // una habitación y una tarifa en gestion-svc, un huésped en user-svc,
 // busca disponibilidad y reserva en reservas-svc, paga el 50%, hace
-// checkin, deja el review del huésped, hace checkout (queda ADEUDADA) y
-// termina de pagar (FINALIZADA). Usa nombres únicos por corrida para no
-// pisar datos de corridas anteriores.
+// checkin, deja el review del huésped y del hotel, hace checkout (queda
+// ADEUDADA porque falta completar el pago) y termina de pagar (FINALIZADA).
+// Usa nombres únicos por corrida para no pisar datos de corridas anteriores.
 test("camino feliz: hotel -> reserva -> pago -> checkin/checkout -> finalizada", async ({
   page,
 }) => {
@@ -119,16 +119,21 @@ test("camino feliz: hotel -> reserva -> pago -> checkin/checkout -> finalizada",
   await page.getByRole("button", { name: "Check-in" }).click();
   await expect(page.getByText("EFECTUADA")).toBeVisible();
 
-  // 8. Review del huésped (obligatorio antes del checkout)
+  // 8. Reviews del huésped y del hotel
   await page.getByLabel("Comentario").first().fill("Todo excelente (E2E)");
   await page.getByRole("button", { name: "Publicar review" }).first().click();
   await expect(page.getByText("Todo excelente (E2E)")).toBeVisible();
 
-  // 9. Check-out con 50% pagado -> ADEUDADA
+  await page.getByLabel("Comentario").last().fill("Muy buen huésped (E2E)");
+  await page.getByRole("button", { name: "Publicar review" }).last().click();
+  await expect(page.getByText("Muy buen huésped (E2E)")).toBeVisible();
+
+  // 9. Check-out con 50% pagado -> ADEUDADA (falta completar el pago, aunque
+  // ya está el review del hotel)
   await page.getByRole("button", { name: "Check-out" }).click();
   await expect(page.getByText("ADEUDADA")).toBeVisible();
 
-  // 10. Pagar el resto -> FINALIZADA
+  // 10. Pagar el resto -> FINALIZADA (pago completo + review del hotel)
   await page.getByRole("button", { name: "+ Agregar pago" }).click();
   dialog = page.getByRole("dialog", { name: "Registrar pago" });
   await dialog.getByLabel("ID de transacción").fill(`e2e-tx-2-${suffix}`);
