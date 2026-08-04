@@ -25,6 +25,14 @@ export function TiposHabitacionPage() {
     queryKey: ["tipos-habitacion"],
     queryFn: gestionSvc.listarTiposHabitacion,
   });
+  const [busqueda, setBusqueda] = useState("");
+  const tiposFiltrados = (query.data ?? []).filter((t) => {
+    const q = busqueda.toLowerCase();
+    return (
+      t.nombre?.toLowerCase().includes(q) ||
+      t.descripcion?.toLowerCase().includes(q)
+    );
+  });
   const [editing, setEditing] = useState<TipoHabitacion | "new" | null>(null);
   const [form, setForm] = useState({
     id: "",
@@ -102,6 +110,16 @@ export function TiposHabitacionPage() {
           </button>
         }
       />
+      <div className="mb-4 max-w-xs">
+        <FormField label="Buscar">
+          <input
+            className={inputClass}
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            placeholder="Nombre o descripción"
+          />
+        </FormField>
+      </div>
       <ErrorMessage error={eliminar.error} />
       {query.isLoading && <Spinner />}
       {query.data && (
@@ -138,8 +156,9 @@ export function TiposHabitacionPage() {
               ),
             },
           ]}
-          rows={query.data}
+          rows={tiposFiltrados}
           keyFn={(t) => t.id}
+          emptyMessage="Sin tipos de habitación para esta búsqueda"
         />
       )}
 

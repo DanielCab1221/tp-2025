@@ -15,10 +15,16 @@ import {
 export function ReservasPage() {
   const navigate = useNavigate();
   const [idUsuario, setIdUsuario] = useState("");
+  const [busqueda, setBusqueda] = useState("");
   const query = useQuery({
     queryKey: ["reservas", idUsuario],
     queryFn: () => reservasSvc.listarReservas(idUsuario || undefined),
   });
+  const reservasFiltradas = (query.data ?? []).filter((r) =>
+    (r.huesped?.nombreApellido ?? "")
+      .toLowerCase()
+      .includes(busqueda.toLowerCase()),
+  );
 
   return (
     <div>
@@ -27,7 +33,7 @@ export function ReservasPage() {
         description="Ciclo de vida completo de una reserva (reservas-svc)."
       />
 
-      <div className="mb-4">
+      <div className="mb-4 flex flex-wrap gap-2">
         <FormField
           label="Filtrar por ID de usuario"
           hint="Vacío = todas las reservas"
@@ -36,6 +42,14 @@ export function ReservasPage() {
             className={inputClass}
             value={idUsuario}
             onChange={(e) => setIdUsuario(e.target.value)}
+          />
+        </FormField>
+        <FormField label="Buscar por huésped">
+          <input
+            className={inputClass}
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            placeholder="Nombre y apellido"
           />
         </FormField>
       </div>
@@ -66,9 +80,10 @@ export function ReservasPage() {
               render: (r) => <EstadoBadge estado={r.estadoReserva ?? "—"} />,
             },
           ]}
-          rows={query.data}
+          rows={reservasFiltradas}
           keyFn={(r) => r._id}
           onRowClick={(r) => navigate(`/reservas/${r._id}`)}
+          emptyMessage="Sin reservas para esta búsqueda"
         />
       )}
     </div>

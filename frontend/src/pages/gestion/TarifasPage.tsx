@@ -20,10 +20,14 @@ export function TarifasPage() {
   const queryClient = useQueryClient();
   const toast = useToast();
   const confirm = useConfirm();
+  const [busqueda, setBusqueda] = useState("");
   const query = useQuery({
     queryKey: ["tarifas"],
     queryFn: gestionSvc.listarTarifas,
   });
+  const tarifasFiltradas = (query.data ?? []).filter((t) =>
+    t.tipoHabitacion.nombre?.toLowerCase().includes(busqueda.toLowerCase()),
+  );
   const tiposQuery = useQuery({
     queryKey: ["tipos-habitacion"],
     queryFn: gestionSvc.listarTiposHabitacion,
@@ -87,6 +91,16 @@ export function TarifasPage() {
           </button>
         }
       />
+      <div className="mb-4 max-w-xs">
+        <FormField label="Buscar por tipo de habitación">
+          <input
+            className={inputClass}
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            placeholder="ej: SINGLE"
+          />
+        </FormField>
+      </div>
       <ErrorMessage error={eliminar.error} />
       {query.isLoading && <Spinner />}
       {query.data && (
@@ -120,8 +134,9 @@ export function TarifasPage() {
               ),
             },
           ]}
-          rows={query.data}
+          rows={tarifasFiltradas}
           keyFn={(t) => t.id}
+          emptyMessage="Sin tarifas para esta búsqueda"
         />
       )}
 

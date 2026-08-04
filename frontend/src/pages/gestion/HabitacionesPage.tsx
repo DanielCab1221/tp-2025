@@ -21,9 +21,18 @@ export function HabitacionesPage() {
   const queryClient = useQueryClient();
   const toast = useToast();
   const [filtros, setFiltros] = useState<BuscarHabitacionesParams>({});
+  const [busqueda, setBusqueda] = useState("");
   const query = useQuery({
     queryKey: ["habitaciones", filtros],
     queryFn: () => gestionSvc.listarHabitaciones(filtros),
+  });
+  const habitacionesFiltradas = (query.data ?? []).filter((h) => {
+    const q = busqueda.toLowerCase();
+    return (
+      h.hotel.nombre?.toLowerCase().includes(q) ||
+      h.tipoHabitacion.nombre?.toLowerCase().includes(q) ||
+      String(h.numero).includes(q)
+    );
   });
   const hotelesQuery = useQuery({
     queryKey: ["hoteles", {}],
@@ -86,6 +95,14 @@ export function HabitacionesPage() {
       />
 
       <div className="mb-4 flex flex-wrap items-end gap-2">
+        <FormField label="Buscar">
+          <input
+            className={inputClass}
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            placeholder="Hotel, tipo o número"
+          />
+        </FormField>
         <FormField label="Hotel">
           <select
             className={inputClass}
@@ -161,9 +178,10 @@ export function HabitacionesPage() {
               render: (h) => (h.disponible ? "Sí" : "No"),
             },
           ]}
-          rows={query.data}
+          rows={habitacionesFiltradas}
           keyFn={(h) => h.id}
           onRowClick={(h) => navigate(`/gestion/habitaciones/${h.id}`)}
+          emptyMessage="Sin habitaciones para esta búsqueda"
         />
       )}
 
